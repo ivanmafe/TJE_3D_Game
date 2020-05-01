@@ -9,6 +9,7 @@
 
 #include <cmath>
 
+//Hello World
 //some globals
 Shader* shader = NULL;
 Animation* anim = NULL;
