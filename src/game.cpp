@@ -21,6 +21,9 @@ bool free_cam = false;
 Game* Game::instance = NULL;
 
 
+
+///añadido comentario para ver que todo funciona :D
+
 Game::Game(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
