@@ -9,7 +9,6 @@
 
 #include <cmath>
 
-//Hello World
 //some globals
 Shader* shader = NULL;
 Animation* anim = NULL;
@@ -21,12 +20,6 @@ bool attached_torpedo = true;
 bool free_cam = false;
 Game* Game::instance = NULL;
 
-
-
-///añadido comentario para ver que todo funciona :D
-
-
-//nuevo comentario 2
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
 {
