@@ -33,3 +33,6 @@ visualstudio/
 xcode/
 *.dll
 *.inc
+game_debug.pdb
+Makefile
+README.txt
