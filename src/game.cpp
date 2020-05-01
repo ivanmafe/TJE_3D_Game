@@ -24,6 +24,9 @@ Game* Game::instance = NULL;
 
 ///añadido comentario para ver que todo funciona :D
 
+
+//nuevo comentario 2
+
 Game::Game(int window_width, int window_height, SDL_Window* window)
 {
 	this->window_width = window_width;
