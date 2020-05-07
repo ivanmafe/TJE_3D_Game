@@ -1,0 +1,49 @@
+//this var comes from the vertex shader
+//they are baricentric interpolated by pixel according to the distance to every vertex
+varying vec3 v_wPos;
+varying vec3 v_wNormal;
+//here create uniforms for all the data we need here
+uniform vec3 light, eye, Ka, Ia, Kd, Id, Ks, Is;
+uniform float shines;
+
+void main()
+{
+	//here we set up the normal as a color to see them as a debug
+
+	//here write the computations for PHONG.
+	//for GOURAUD you dont need to do anything here, just pass the color from the vertex shader
+	//...
+    vec3 wPos = v_wPos;
+    vec3 wNormal = normalize(v_wNormal);
+ 
+    vec3 lvec = normalize(light - wPos);
+    vec3 vvec = normalize(eye - wPos);
+    vec3 lvecneg = lvec*(-1.0);
+    vec3 rvec = reflect( lvecneg,  wNormal);
+    rvec = normalize(rvec);
+    vec3 ambient=Ka*Ia;
+    
+    vec3 diffuse;
+    if (dot(lvec, wNormal) < 0.0) {
+        diffuse = vec3(0.0,0.0,0.0);
+    }
+    else {
+        diffuse = dot(lvec, wNormal) * Kd * Id;
+    }
+    
+    vec3 spec;
+    if (dot(rvec,vvec) <= 0.0) {
+        spec = vec3(0.0,0.0,0.0);
+    }
+    else {
+        spec = pow(dot(rvec,vvec),shines) * Ks * Is;
+    }
+
+
+    //in GOURAUD compute the color here and pass it to the pixel shader
+    //...
+    vec3 color = ambient + diffuse + spec;
+
+	//set the ouput color por the pixel
+	gl_FragColor = vec4( color, 1.0 );
+}
