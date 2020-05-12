@@ -1,8 +1,22 @@
 Esquinas
-- 0 esquina (up-left)
-- 2 esquina (up-right)
-- 20 esquina (bott-left)
-- 22 esquina (bott-right)
+- 0 up-left
+- 2 up-right
+- 20 bott-left
+- 22 bott-right
+ContraEsquina
+- 3 topLeft
+- 4 topRight
+- 13 bottLeft
+- 14 BottRight
 Pared
+- 1 top
+- 10 left
+- 12 right
+- 21 bott
 Suelo
+- 8 flora
+- 11 basic
 Cascada
+- 5 Casc1
+- 6 Casc2
+- 7 Casc3

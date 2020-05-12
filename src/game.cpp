@@ -49,8 +49,8 @@ int* readCSV(std::string filesrc, int size) { //archivo y tamaño de area
 Mesh * meshes[10];
 Texture * textures[10];
 
-const int w = 4;
-const int h = 4;
+const int w = 7;
+const int h = 5;
 int map[w * h];
 
 
@@ -80,15 +80,64 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 
-	meshes[1] = Mesh::Get("data/Assets/Meshes/ground_flora.obj");
-	textures[1] = Texture::Get("data/Assets/Textures/ground_flora.png");
 
-	memcpy(&map, readCSV("data/Assets/VoidMap.csv", (w * h)), w * h * sizeof(int));
+	//SUELO
+	meshes[0] = Mesh::Get("data/Assets/Meshes/suelo.obj");
+	textures[0] = Texture::Get("data/Assets/Textures/suelo.png");
+	meshes[7] = Mesh::Get("data/Assets/Meshes/ground_flora.obj");
+	textures[7] = Texture::Get("data/Assets/Textures/ground_flora.png");
+	//ESQUINA
+	meshes[1] = Mesh::Get("data/Assets/Meshes/esquina.obj");
+	textures[1] = Texture::Get("data/Assets/Textures/esquina.png");
+	//ESQUINA INTERNA
+	meshes[2] = Mesh::Get("data/Assets/Meshes/esquinainterna.obj");
+	textures[2] = Texture::Get("data/Assets/Textures/esquinainterna.png");
+	//PARED
+	meshes[3] = Mesh::Get("data/Assets/Meshes/pared.obj");
+	textures[3] = Texture::Get("data/Assets/Textures/pared.png");
+	//CASCADAS
+	meshes[4] = Mesh::Get("data/Assets/Meshes/cascada1.obj");
+	textures[4] = Texture::Get("data/Assets/Textures/cascada1.png");
+	meshes[5] = Mesh::Get("data/Assets/Meshes/cascada2.obj");
+	textures[5] = Texture::Get("data/Assets/Textures/cascada2.png");
+	meshes[6] = Mesh::Get("data/Assets/Meshes/cascada3.obj");
+	textures[6] = Texture::Get("data/Assets/Textures/cascada3.png");
+
+	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
 
+void chooseModel(Matrix44 * m, int tile, int * index) {
+
+	Vector3 pos = m->getTranslation();
+	m->setIdentity();
+
+	if (tile == 11) *index = 0; //SUELO
+	else if (tile == 8) *index = 7;
+	else if (tile == 0) { *index = 1; m->translate(0, 0, -2); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); } //ESQUINAS
+	else if (tile == 2) { *index = 1; }
+	else if (tile == 20) { *index = 1; m->translate(-2, 0, -2); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0));}
+	else if (tile == 22) { *index = 1; m->translate(-2, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); }
+	
+	else if (tile == 3) { *index = 2; m->translate(-2, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); } //CONTRA-ESQUINAS
+	else if (tile == 4) { *index = 2; m->translate(-2, 0, -2); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0));}
+	else if (tile == 13) { *index = 2; }
+	else if (tile == 14) { *index = 2; m->translate(0, 0, -2); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
+
+	else if (tile == 1) { *index = 3; } //PARED
+	else if (tile == 10) { *index = 3; m->translate(0, 0, -2); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
+	else if (tile == 12) { *index = 3; m->translate(-2, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0));}
+	else if (tile == 21) { *index = 3; m->translate(-2, 0, -2); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0));}
+
+	else if (tile == 5) { *index = 4; } //CASCADA-ESQUINAS
+	else if (tile == 6) { *index = 5; }
+	else if (tile == 7) { *index = 6; }
+	else *index = -1;
+
+	m->translateGlobal(pos.x, pos.y, pos.z);
+}
 
 void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 {
@@ -114,12 +163,15 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 
 void renderMap(int * map, int w, int h) {
 
-	for(int i = 0 ; i < 4 ; ++i)
-		for (int j = 0; j < 4; ++j) {
+	int ind = 0;
+	for (int i = 0; i < h; ++i)
+		for (int j = 0; j < w; ++j) {
 			Matrix44 m;
-			m.translateGlobal(-2.*i, 0., -2.*j);
+			m.translateGlobal(2.*i, 0., -2.*j);
 			int tmp = map[i * w + j];
-			renderMesh(m, meshes[tmp], textures[tmp]);
+			chooseModel(&m, tmp, &ind);
+			if(ind != -1)renderMesh(m, meshes[ind], textures[ind]);
+
 		}
 }
 
