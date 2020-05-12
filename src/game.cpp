@@ -7,6 +7,9 @@
 #include "input.h"
 #include "animation.h"
 
+#include <fstream>
+#include <sstream>
+
 #include <cmath>
 
 //some globals
@@ -18,6 +21,37 @@ bool free_cam = true;
 float speed = 0.1;
 
 Game* Game::instance = NULL;
+
+
+int* readCSV(std::string filesrc, int size) { //archivo y tamaño de area
+	int pos = 0;
+	int* mapborder = new int[size];
+	std::fstream file;
+	file.open(filesrc, std::fstream::in);
+	if (!file.is_open()) {
+		fprintf(stderr, "Error locating the file map");
+	}
+	int aux = 0;
+	while (file.good()) {
+		std::string line;
+		while (getline(file, line)) {   // get a whole line
+			std::stringstream ss(line);
+			while (getline(ss, line, ',')) {
+				int aux;
+				std::istringstream(line) >> aux;
+				mapborder[pos++] = aux;
+			}
+		}
+	}
+	return mapborder;
+}
+
+Mesh * meshes[10];
+Texture * textures[10];
+
+const int w = 4;
+const int h = 4;
+int map[w * h];
 
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
@@ -45,6 +79,12 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
+
+	meshes[1] = Mesh::Get("data/Assets/Meshes/ground1.obj");
+	textures[1] = Texture::Get("data/Assets/Textures/ground1.png");
+
+	memcpy(&map, readCSV("data/Assets/VoidMap.csv", (w * h)), w * h * sizeof(int));
+
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -70,6 +110,17 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 
 	//disable shader
 	shader->disable();
+}
+
+void renderMap(int * map, int w, int h) {
+
+	for(int i = 0 ; i < 4 ; ++i)
+		for (int j = 0; j < 4; ++j) {
+			Matrix44 m;
+			m.translateGlobal(2.*i, 0., -2.*j);
+			int tmp = map[i * w + j];
+			renderMesh(m, meshes[tmp], textures[tmp]);
+		}
 }
 
 //what to do when the image has to be draw
@@ -102,11 +153,8 @@ void Game::render(void)
    
 	//create model matrix for cube
 	Matrix44 m;
-
-
-	Texture * texture = Texture::Get("data/test.png");
-	Mesh* mesh = Mesh::Get("data/test.obj");
-	renderMesh(m, mesh, texture);
+	//renderMesh(m, meshes[1], textures[1]);
+	renderMap(map, w, h);
 
 	//Draw the floor grid
 	drawGrid();
@@ -144,6 +192,9 @@ void Game::update(double seconds_elapsed)
 		if (Input::isKeyPressed(SDL_SCANCODE_S) || Input::isKeyPressed(SDL_SCANCODE_DOWN)) camera->move(Vector3(0.0f, 0.0f, -1.0f) * speed);
 		if (Input::isKeyPressed(SDL_SCANCODE_A) || Input::isKeyPressed(SDL_SCANCODE_LEFT)) camera->move(Vector3(1.0f, 0.0f, 0.0f) * speed);
 		if (Input::isKeyPressed(SDL_SCANCODE_D) || Input::isKeyPressed(SDL_SCANCODE_RIGHT)) camera->move(Vector3(-1.0f, 0.0f, 0.0f) * speed);
+			
+		
+
 	}
 
 	if (mouse_locked)
