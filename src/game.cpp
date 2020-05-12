@@ -80,8 +80,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 
-	meshes[1] = Mesh::Get("data/Assets/Meshes/ground1.obj");
-	textures[1] = Texture::Get("data/Assets/Textures/ground1.png");
+	meshes[1] = Mesh::Get("data/Assets/Meshes/ground_flora.obj");
+	textures[1] = Texture::Get("data/Assets/Textures/ground_flora.png");
 
 	memcpy(&map, readCSV("data/Assets/VoidMap.csv", (w * h)), w * h * sizeof(int));
 
@@ -117,7 +117,7 @@ void renderMap(int * map, int w, int h) {
 	for(int i = 0 ; i < 4 ; ++i)
 		for (int j = 0; j < 4; ++j) {
 			Matrix44 m;
-			m.translateGlobal(2.*i, 0., -2.*j);
+			m.translateGlobal(-2.*i, 0., -2.*j);
 			int tmp = map[i * w + j];
 			renderMesh(m, meshes[tmp], textures[tmp]);
 		}

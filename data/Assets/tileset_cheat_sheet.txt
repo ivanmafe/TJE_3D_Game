@@ -1,0 +1,8 @@
+Esquinas
+- 0 esquina (up-left)
+- 2 esquina (up-right)
+- 20 esquina (bott-left)
+- 22 esquina (bott-right)
+Pared
+Suelo
+Cascada
