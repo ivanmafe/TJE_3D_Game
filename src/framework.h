@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <cmath>
+#include <stdlib.h>
 
 #ifndef PI
 	#define PI 3.14159265359
@@ -22,8 +23,11 @@ typedef short int16;
 typedef int int32;
 typedef unsigned int uint32;
 
-inline float clamp(float v, float a, float b) { return v < a ? a : (v > b ? b : v); }
+//ideas to use them https://www.youtube.com/watch?v=R6UB7mVO3fY
+inline float clamp(float v, float a = 0.0f, float b = 1.0f) { return v < a ? a : (v > b ? b : v); }
 inline float lerp(float a, float b, float v ) { return a*(1.0f-v) + b*v; }
+inline float invlerp(float a, float b, float v ) { return (v-a)/(b-a); }
+inline float remap(float iMin, float iMax, float oMin, float oMax, float v ) { return lerp( oMin,oMax, invlerp(iMin,iMax,v)); }
 
 class Vector2
 {
@@ -207,7 +211,7 @@ class Matrix44
 		void clear();
 		void setIdentity();
 		void transpose();
-		void normalizeAxis();	
+		void normalizeAxis();
 
 		//get base vectors
 		Vector3 rightVector() { return Vector3(m[0],m[1],m[2]); }

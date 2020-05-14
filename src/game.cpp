@@ -103,6 +103,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[6] = Mesh::Get("data/Assets/Meshes/cascada3.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/cascada3.png");
 
+
+	meshes[8] = Mesh::Get("data/export.OBJ");
+	textures[8] = Texture::Get("data/hero.tga");
+
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
 	//hide the cursor
@@ -205,7 +209,7 @@ void Game::render(void)
    
 	//create model matrix for cube
 	Matrix44 m;
-	//renderMesh(m, meshes[1], textures[1]);
+	renderMesh(m, meshes[8], textures[8]);
 	renderMap(map, w, h);
 
 	//Draw the floor grid
