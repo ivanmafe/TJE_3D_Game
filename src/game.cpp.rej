@@ -1,0 +1,15 @@
+diff a/src/game.cpp b/src/game.cpp	(rejected hunks)
+@@ -103,6 +103,13 @@
+  	meshes[6] = Mesh::Get("data/Assets/Meshes/cascada3.obj");
+  	textures[6] = Texture::Get("data/Assets/Textures/cascada3.png");
+  
+++<<<<<<< HEAD
+++=======
++ 
++ 	meshes[8] = Mesh::Get("data/export.OBJ");
++ 	textures[8] = Texture::Get("data/hero.tga");
++ 
+++>>>>>>> parent of b8eaef8... Bug on render
+  	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
+  
+  	//hide the cursor

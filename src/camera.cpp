@@ -18,6 +18,9 @@ void Camera::enable()
 	updateProjectionMatrix();
 	extractFrustum();
 
+	iview_matrix = view_matrix;
+	iview_matrix.inverse();
+
 	//old...
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection_matrix.m);
@@ -49,11 +52,7 @@ void Camera::updateProjectionMatrix()
 
 Vector3 Camera::getLocalVector(const Vector3& v)
 {
-	Matrix44 iV = view_matrix;
-	if (iV.inverse() == false)
-		std::cout << "Matrix Inverse error" << std::endl;
-	Vector3 result = iV.rotateVector(v);
-	return result;
+	return iview_matrix.rotateVector(v);
 }
 
 void Camera::move(Vector3 delta)
