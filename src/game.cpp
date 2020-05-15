@@ -164,6 +164,7 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_texture", texture);
 	shader->setUniform("u_model", m);
+	shader->setUniform("u_light_direction", Vector3(-2, 2, 3));
 	//shader->setUniform("u_time", time);
 	mesh->render(GL_TRIANGLES);
 
@@ -219,13 +220,13 @@ void Game::render(void)
 	//create model matrix for cube
 	Matrix44 m;
 	m.scale(0.2,0.2,0.2);
-	m.translate(-4, 1.2, -4);
+	m.translate(0, 1.2, 0);
 	renderMesh(m, meshes[8], textures[8]);
 
 
 	Matrix44 m2;
 	m2.scale(0.2, 0.2, 0.2);
-	m2.translate(-6, 1.2, -6);
+	m2.translate(0, 1.2, 0);
 
 	renderMesh(m2, meshes[9], textures[9]);
 
