@@ -18,7 +18,7 @@ Animation* anim = NULL;
 float angle = 0;
 
 bool free_cam = true;
-float speed = 0.1;
+float speed = 0.05;
 
 Game* Game::instance = NULL;
 
@@ -46,8 +46,8 @@ int* readCSV(std::string filesrc, int size) { //archivo y tamaño de area
 	return mapborder;
 }
 
-Mesh * meshes[10];
-Texture * textures[10];
+Mesh * meshes[20];
+Texture * textures[20];
 
 const int w = 7;
 const int h = 5;
@@ -108,6 +108,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	meshes[9] = Mesh::Get("data/Assets/Meshes/GHOST.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
+
+	meshes[10] = Mesh::Get("data/Assets/Meshes/big_terrain.obj");
+	textures[10] = Texture::Get("data/Assets/Textures/big_terrain.png");
+
 
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
@@ -225,7 +229,11 @@ void Game::render(void)
 
 	renderMesh(m2, meshes[9], textures[9]);
 
-	renderMap(map, w, h);
+	//renderMap(map, w, h);
+	Matrix44 m1;
+	m1.translate(2.0f, 0.0f, -2.0f);
+	renderMesh(m1, meshes[10], textures[10]);
+
 
 	//Draw the floor grid
 	drawGrid();
