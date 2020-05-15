@@ -104,10 +104,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[6] = Texture::Get("data/Assets/Textures/cascada3.png");
 
 	meshes[8] = Mesh::Get("data/Assets/Meshes/hero.obj");
-	textures[8] = Texture::Get("data/Assets/Textures/hero.png");
+	textures[8] = Texture::Get("data/Assets/Textures/hero.tga");
 
 	meshes[9] = Mesh::Get("data/Assets/Meshes/GHOST.obj");
-	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.png");
+	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
@@ -169,16 +169,19 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 
 void renderMap(int * map, int w, int h) {
 
+	std::vector<Matrix44> models; 
+
 	int ind = 0;
 	for (int i = 0; i < h; ++i)
 		for (int j = 0; j < w; ++j) {
 			Matrix44 m;
-			m.translateGlobal(2.*i, 0., -2.*j);
+			m.translateGlobal(2.*i + 2, 0., -2.*j);
 			int tmp = map[i * w + j];
 			chooseModel(&m, tmp, &ind);
 			if(ind != -1)renderMesh(m, meshes[ind], textures[ind]);
 
 		}
+	//meshes[0]->renderInstanced(GL_TRIANGLES, -1 , );
 }
 
 //what to do when the image has to be draw
@@ -221,6 +224,7 @@ void Game::render(void)
 	m2.translate(-6, 1.2, -6);
 
 	renderMesh(m2, meshes[9], textures[9]);
+
 	renderMap(map, w, h);
 
 	//Draw the floor grid
