@@ -113,6 +113,11 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[9] = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 
+
+	meshes[10] = Mesh::Get("data/Assets/Meshes/Dog.obj");
+	textures[10] = Texture::Get("data/Assets/Textures/Dog.tga");
+
+
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
 	//hide the cursor
@@ -194,16 +199,6 @@ void renderMap(int * map, int w, int h) {
 void Game::render(void)
 {
 
-	/*
-	Camera* camera = Camera::current;
-
-	Vector3 eye = camera->eye;
-	Vector3 center = camera->center;
-	Vector3 up = camera->up;
-
-	if(!free_cam)
-		camera->lookAt( eye , center, up); //position the camera and point to 0,0,0
-		*/
 	//set the clear color (the background color)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -227,7 +222,14 @@ void Game::render(void)
 	m.translate(0, -1.0f, 0);
 	renderMesh(m, meshes[0], textures[0]);
 	renderMap(map,w,h);
+	
+	
+	Matrix44 m2;
+	m2.rotate(90 * DEG2RAD, Vector3(1, 0, 0));
+	m2.scale(0.01, 0.01, 0.01);
 
+	m2.translate(0, 0, 2.f);
+	renderMesh(m2, meshes[10], textures[10]);
 /*
 	Matrix44 m2;
 	m2.scale(0.2, 0.2, 0.2);
@@ -255,8 +257,13 @@ void Game::render(void)
 
 void Game::update(double seconds_elapsed)
 {
-	if (Input::isKeyPressed(SDL_SCANCODE_TAB)) free_cam = !free_cam;
+
+	if (Input::isKeyPressed(SDL_SCANCODE_V)) free_cam = !free_cam;
 	if (!free_cam) {
+		
+		camera->eye = player.model * Vector3(0, 0.8, 1.2);
+		camera->center = player.model * Vector3();
+
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			player.movePos(Vector3(0.f,0.f,-1.f) * player.speed);
 		}
