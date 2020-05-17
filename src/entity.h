@@ -9,8 +9,7 @@ public:
 	
 	Matrix44 model;
 	Vector3 pos;
-	Vector3 looking;
-	float speed = 0.01f;
+	float speed = 0.005f;
 
 	Entity();
 	void movePos(Vector3 p);
