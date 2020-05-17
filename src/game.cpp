@@ -123,11 +123,11 @@ void chooseModel(Matrix44 * m, int tile, int * index) {
 
 	Vector3 pos = m->getTranslation();
 	m->setIdentity();
-
+	/*
 	if (tile == 11) *index = 0; //SUELO
 	else if (tile == 8) *index = 7;
 
-	else if (tile == 0) { *index = 1; } //ESQUINAS
+	else*/ if (tile == 0) { *index = 1; } //ESQUINAS
 	else if (tile == 2) { *index = 1; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); }
 	else if (tile == 20) { *index = 1; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
 	else if (tile == 22) { *index = 1; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); }
@@ -181,7 +181,7 @@ void renderMap(int * map, int w, int h) {
 	for (int i = 0; i < h; ++i)
 		for (int j = 0; j < w; ++j) {
 			Matrix44 m;
-			m.translateGlobal(4.*i + 2, -1.f, -4.*j -2);
+			m.translateGlobal(4.*i + 2, 0, -4.*j -2);
 			int tmp = map[i * w + j];
 			chooseModel(&m, tmp, &ind);
 			if(ind != -1)renderMesh(m, meshes[ind], textures[ind]);
@@ -222,7 +222,12 @@ void Game::render(void)
 
 	//create model matrix for cube
 	renderMesh(player.model, meshes[8], textures[8]);
+	Matrix44 m;
+	m.scale(100, 0, 100);
+	m.translate(0, -1.0f, 0);
+	renderMesh(m, meshes[0], textures[0]);
 	renderMap(map,w,h);
+
 /*
 	Matrix44 m2;
 	m2.scale(0.2, 0.2, 0.2);
