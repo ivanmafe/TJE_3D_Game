@@ -7,8 +7,11 @@
 #include "input.h"
 #include "animation.h"
 
+//own includes
 #include <fstream>
 #include <sstream>
+#include "entity.h"
+
 
 #include <cmath>
 
@@ -17,8 +20,9 @@ Shader* shader = NULL;
 Animation* anim = NULL;
 float angle = 0;
 
-bool free_cam = true;
+bool free_cam = false;
 float speed = 0.05;
+Entity player;
 
 Game* Game::instance = NULL;
 
@@ -74,8 +78,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	//create our camera
 	camera = new Camera();
-	camera->lookAt(Vector3(0.f,10.f, 10.f),Vector3(0.f,0.f,0.f), Vector3(0.f,1.f,0.f)); //position the camera and point to 0,0,0
+	camera->lookAt(Vector3(0.2f,0.6f,-0.5f),Vector3(0.2f,0.f,1.f), Vector3(0.f,1.f,0.f)); //position the camera and point to 0,0,0
 	camera->setPerspective(70.f,window_width/(float)window_height,0.1f,100000.f); //set the projection, we want to be perspective
+
+
 
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
@@ -103,15 +109,11 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[6] = Mesh::Get("data/Assets/Meshes/cascada3.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/cascada3.png");
 
-	meshes[8] = Mesh::Get("data/Assets/Meshes/hero.obj");
+	meshes[8] = Mesh::Get("data/Assets/Meshes/Hero.obj");
 	textures[8] = Texture::Get("data/Assets/Textures/hero.tga");
 
 	meshes[9] = Mesh::Get("data/Assets/Meshes/GHOST.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
-
-	meshes[10] = Mesh::Get("data/Assets/Meshes/big_terrain.obj");
-	textures[10] = Texture::Get("data/Assets/Textures/big_terrain.png");
-
 
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
@@ -217,23 +219,24 @@ void Game::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
+
+
 	//create model matrix for cube
-	Matrix44 m;
-	m.scale(0.2,0.2,0.2);
-	m.translate(0, 1.2, 0);
-	renderMesh(m, meshes[8], textures[8]);
+	renderMesh(player.model, meshes[8], textures[8]);
 
-
+/*
 	Matrix44 m2;
 	m2.scale(0.2, 0.2, 0.2);
 	m2.translate(0, 1.2, 0);
 
 	renderMesh(m2, meshes[9], textures[9]);
 
-	//renderMap(map, w, h);
+//renderMap(map, w, h);
+	
 	Matrix44 m1;
-	m1.translate(2.0f, 0.0f, -2.0f);
+	m1.translate(2.0f, -0.35f, -2.0f);
 	renderMesh(m1, meshes[10], textures[10]);
+*/
 
 
 	//Draw the floor grid
@@ -248,33 +251,41 @@ void Game::render(void)
 
 void Game::update(double seconds_elapsed)
 {
-
-
-	//mouse input to rotate the cam
-	if ((Input::mouse_state & SDL_BUTTON_LEFT) || mouse_locked ) //is left button pressed?
-	{
-		camera->rotate(Input::mouse_delta.x * 0.005f, Vector3(0.0f,-1.0f,0.0f));
-		camera->rotate(Input::mouse_delta.y * 0.005f, camera->getLocalVector( Vector3(-1.0f,0.0f,0.0f)));
+	if (Input::isKeyPressed(SDL_SCANCODE_TAB)) free_cam = !free_cam;
+	if (!free_cam) {
+		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
+			player.movePos(Vector3(0.f,0.f,-1.f) * player.speed);
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			player.movePos(Vector3(0.f, 0.f, 1.f) * player.speed);
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
+			player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+			player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) player.changeView(-1.0f);
+		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) player.changeView(1.0f);
 	}
-	/*
-	if (free_cam == false)
-	{
-		if (Input::isKeyPressed(SDL_SCANCODE_W) || Input::isKeyPressed(SDL_SCANCODE_UP)) plane_model.rotate(90 * seconds_elapsed * DEG2RAD, Vector3(1, 0, 0));
-		if (Input::isKeyPressed(SDL_SCANCODE_S) || Input::isKeyPressed(SDL_SCANCODE_DOWN)) plane_model.rotate(-90 * seconds_elapsed * DEG2RAD, Vector3(1, 0, 0));
-		if (Input::isKeyPressed(SDL_SCANCODE_A) || Input::isKeyPressed(SDL_SCANCODE_LEFT)) plane_model.rotate(-90 * seconds_elapsed * DEG2RAD, Vector3(0, 1, 0));
-		if (Input::isKeyPressed(SDL_SCANCODE_D) || Input::isKeyPressed(SDL_SCANCODE_RIGHT)) plane_model.rotate(90 * seconds_elapsed * DEG2RAD, Vector3(0, 1, 0));
-		if (Input::isKeyPressed(SDL_SCANCODE_Q)) plane_model.rotate(40 * seconds_elapsed * DEG2RAD, Vector3(0, 0, -1));
-		if (Input::isKeyPressed(SDL_SCANCODE_E)) plane_model.rotate(-40 * seconds_elapsed * DEG2RAD, Vector3(0, 0, -1));
-	}
-	*/
-	if (free_cam) {		//async input to move the camera around
+	else {
+		//mouse input to rotate the cam
+		if ((Input::mouse_state & SDL_BUTTON_LEFT) || mouse_locked) //is left button pressed?
+		{
+			camera->rotate(Input::mouse_delta.x * 0.005f, Vector3(0.0f, -1.0f, 0.0f));
+			camera->rotate(Input::mouse_delta.y * 0.005f, camera->getLocalVector(Vector3(-1.0f, 0.0f, 0.0f)));
+		}
 		if (Input::isKeyPressed(SDL_SCANCODE_W) || Input::isKeyPressed(SDL_SCANCODE_UP)) camera->move(Vector3(0.0f, 0.0f, 1.0f) * speed);
 		if (Input::isKeyPressed(SDL_SCANCODE_S) || Input::isKeyPressed(SDL_SCANCODE_DOWN)) camera->move(Vector3(0.0f, 0.0f, -1.0f) * speed);
 		if (Input::isKeyPressed(SDL_SCANCODE_A) || Input::isKeyPressed(SDL_SCANCODE_LEFT)) camera->move(Vector3(1.0f, 0.0f, 0.0f) * speed);
 		if (Input::isKeyPressed(SDL_SCANCODE_D) || Input::isKeyPressed(SDL_SCANCODE_RIGHT)) camera->move(Vector3(-1.0f, 0.0f, 0.0f) * speed);
-			
 		
-
+		//get camera values
+		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
+			//std::cout << "Camera pos: " << camera->eye.x << ',' << camera->eye.y << ',' << camera->eye.z << '\n';
+			//std::cout << "Camera dir: " << camera->center.x << ',' << camera->center.y << ',' << camera->center.z << '\n';
+			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
+		}
 	}
 
 	if (mouse_locked)
