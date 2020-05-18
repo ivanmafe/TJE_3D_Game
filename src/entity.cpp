@@ -6,7 +6,7 @@ Entity::Entity() {
 
 void Entity::movePos(Vector3 p) {
 	pos = pos + p;
-	model.translate(p.x, p.y, p.z);
+	setModelPos(pos);
 }
 
 void Entity::changeView(float v) {
@@ -20,4 +20,10 @@ void Entity::changeView(float v) {
 	
 	model.m[12] = t.x;
 	model.m[14] = t.z;
+}
+
+void Entity::setModelPos(Vector3 p) {
+	model.m[12] = p.x;
+	model.m[13] = p.y;
+	model.m[14] = p.z;
 }

@@ -14,6 +14,7 @@ public:
 	Entity();
 	void movePos(Vector3 p);
 	void changeView(float v);
+	void setModelPos(Vector3 p);
 };
 
 #endif

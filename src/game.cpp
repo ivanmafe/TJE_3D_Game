@@ -23,6 +23,7 @@ float angle = 0;
 bool free_cam = true;
 float speed = 0.05;
 Entity player;
+Entity dog;
 
 Game* Game::instance = NULL;
 
@@ -82,10 +83,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	camera->setPerspective(70.f,window_width/(float)window_height,0.1f,100000.f); //set the projection, we want to be perspective
 
 
-
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
-
 
 	//SUELO
 	meshes[0] = Mesh::Get("data/Assets/Meshes/vacio.obj");
@@ -117,7 +116,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[10] = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	textures[10] = Texture::Get("data/Assets/Textures/Dog.tga");
 
-
+	player.pos = Vector3(5.f, 0, -16.5f);
+	player.setModelPos(Vector3(5.f, 0, -16.5f));
 	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
 
 	//hide the cursor
@@ -198,7 +198,10 @@ void renderMap(int * map, int w, int h) {
 //what to do when the image has to be draw
 void Game::render(void)
 {
-
+	if(!free_cam){
+		camera->eye = player.model * Vector3(0, 0.8, 1.2);
+		camera->center = player.model * Vector3();
+	}
 	//set the clear color (the background color)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -214,36 +217,15 @@ void Game::render(void)
 	glEnable(GL_CULL_FACE);
    
 
-
-	//create model matrix for cube
 	renderMesh(player.model, meshes[8], textures[8]);
+	renderMesh(dog.model, meshes[10], textures[10]);
+
 	Matrix44 m;
 	m.scale(100, 0, 100);
 	m.translate(0, -1.0f, 0);
 	renderMesh(m, meshes[0], textures[0]);
+	
 	renderMap(map,w,h);
-	
-	
-	Matrix44 m2;
-	m2.rotate(90 * DEG2RAD, Vector3(1, 0, 0));
-	m2.scale(0.01, 0.01, 0.01);
-
-	m2.translate(0, 0, 2.f);
-	renderMesh(m2, meshes[10], textures[10]);
-/*
-	Matrix44 m2;
-	m2.scale(0.2, 0.2, 0.2);
-	m2.translate(0, 1.2, 0);
-
-	renderMesh(m2, meshes[9], textures[9]);
-
-//renderMap(map, w, h);
-	
-	Matrix44 m1;
-	m1.translate(2.0f, -0.35f, -2.0f);
-	renderMesh(m1, meshes[10], textures[10]);
-*/
-
 
 	//Draw the floor grid
 	drawGrid();
@@ -260,24 +242,32 @@ void Game::update(double seconds_elapsed)
 
 	if (Input::isKeyPressed(SDL_SCANCODE_V)) free_cam = !free_cam;
 	if (!free_cam) {
-		
-		camera->eye = player.model * Vector3(0, 0.8, 1.2);
-		camera->center = player.model * Vector3();
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			player.movePos(Vector3(0.f,0.f,-1.f) * player.speed);
+			dog.movePos(Vector3(0.f, 0.f, -1.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
 			player.movePos(Vector3(0.f, 0.f, 1.f) * player.speed);
+			dog.movePos(Vector3(0.f, 0.f, 1.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
 			player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
+			dog.movePos(Vector3(-1.f, 0.f, 0.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
 			player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
+			dog.movePos(Vector3(1.f, 0.f, 0.f) * dog.speed);
 		}
-		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) player.changeView(-1.0f);
-		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) player.changeView(1.0f);
+		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) { player.changeView(-1.0f); dog.changeView(-1.0f); }
+		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) { player.changeView(1.0f); dog.changeView(1.0f);  }
+		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
+		dog.setModelPos(aux);
+
+		//GET PLAYER POS
+		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
+			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
+		}
 	}
 	else {
 		//mouse input to rotate the cam
@@ -293,9 +283,8 @@ void Game::update(double seconds_elapsed)
 		
 		//get camera values
 		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
-			//std::cout << "Camera pos: " << camera->eye.x << ',' << camera->eye.y << ',' << camera->eye.z << '\n';
-			//std::cout << "Camera dir: " << camera->center.x << ',' << camera->center.y << ',' << camera->center.z << '\n';
-			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
+			std::cout << "Camera pos: " << camera->eye.x << ',' << camera->eye.y << ',' << camera->eye.z << '\n';
+			std::cout << "Camera dir: " << camera->center.x << ',' << camera->center.y << ',' << camera->center.z << '\n';
 		}
 	}
 
