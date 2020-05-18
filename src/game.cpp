@@ -199,8 +199,8 @@ void renderMap(int * map, int w, int h) {
 void Game::render(void)
 {
 	if(!free_cam){
-		camera->eye = player.model * Vector3(0, 0.8, 1.2);
-		camera->center = player.model * Vector3();
+		camera->eye = player.model * Vector3(0, 0.6, 0.7);
+		camera->center = player.model * Vector3(0,-0.2,-0.5);
 	}
 	//set the clear color (the background color)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -261,6 +261,7 @@ void Game::update(double seconds_elapsed)
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) { player.changeView(-1.0f); dog.changeView(-1.0f); }
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) { player.changeView(1.0f); dog.changeView(1.0f);  }
+		
 		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
 		dog.setModelPos(aux);
 

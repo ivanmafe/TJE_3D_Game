@@ -5,8 +5,9 @@ Entity::Entity() {
 }
 
 void Entity::movePos(Vector3 p) {
-	pos = pos + p;
-	setModelPos(pos);
+
+	model.translate(p.x, p.y, p.z);
+	pos = model.getTranslation();
 }
 
 void Entity::changeView(float v) {
