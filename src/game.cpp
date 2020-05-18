@@ -87,8 +87,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 
 	//SUELO
-	meshes[0] = Mesh::Get("data/Assets/Meshes/vacio.obj");
-	textures[0] = Texture::Get("data/Assets/Textures/vacio.png");
+	meshes[0] = Mesh::Get("data/Assets/Meshes/ground.obj");
+	textures[0] = Texture::Get("data/Assets/Textures/ground.png");
 	//ESQUINA
 	meshes[1] = Mesh::Get("data/Assets/Meshes/esquina_exterior_1.obj");
 	textures[1] = Texture::Get("data/Assets/Textures/esquina_exterior_1.png");
@@ -106,7 +106,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[6] = Mesh::Get("data/Assets/Meshes/casa1.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/casa1.png");
 
-	meshes[8] = Mesh::Get("data/Assets/Meshes/Hero.obj");
+	meshes[8] = Mesh::Get("data/Assets/Meshes/hero.obj");
 	textures[8] = Texture::Get("data/Assets/Textures/hero.tga");
 
 	meshes[9] = Mesh::Get("data/Assets/Meshes/Ghost.obj");
@@ -170,7 +170,7 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_texture", texture);
 	shader->setUniform("u_model", m);
-	shader->setUniform("u_light_direction", Vector3(-2, 2, 3));
+	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
 	//shader->setUniform("u_time", time);
 	mesh->render(GL_TRIANGLES);
 
@@ -199,8 +199,8 @@ void renderMap(int * map, int w, int h) {
 void Game::render(void)
 {
 	if(!free_cam){
-		camera->eye = player.model * Vector3(0, 0.6, 0.7);
-		camera->center = player.model * Vector3(0,-0.2,-0.5);
+		camera->eye = player.model * Vector3(0, 1.3, 0.5);
+		camera->center = player.model * Vector3(0,0,-1);
 	}
 	//set the clear color (the background color)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -222,7 +222,7 @@ void Game::render(void)
 
 	Matrix44 m;
 	m.scale(100, 0, 100);
-	m.translate(0, -1.0f, 0);
+	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
 	
 	renderMap(map,w,h);
