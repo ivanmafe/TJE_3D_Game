@@ -8,10 +8,10 @@
 #include "animation.h"
 
 //own includes
-#include <fstream>
-#include <sstream>
-#include "entity.h"
 
+#include "entity.h"
+#include "world.h"
+#include "stage.h"
 
 #include <cmath>
 
@@ -25,38 +25,14 @@ float speed = 0.05;
 Entity player;
 Entity dog;
 
+World my_world;
+
 Game* Game::instance = NULL;
 
-
-int* readCSV(std::string filesrc, int size) { //archivo y tamaño de area
-	int pos = 0;
-	int* mapborder = new int[size];
-	std::fstream file;
-	file.open(filesrc, std::fstream::in);
-	if (!file.is_open()) {
-		fprintf(stderr, "Error locating the file map");
-	}
-	int aux = 0;
-	while (file.good()) {
-		std::string line;
-		while (getline(file, line)) {   // get a whole line
-			std::stringstream ss(line);
-			while (getline(ss, line, ',')) {
-				int aux;
-				std::istringstream(line) >> aux;
-				mapborder[pos++] = aux;
-			}
-		}
-	}
-	return mapborder;
-}
 
 Mesh * meshes[20];
 Texture * textures[20];
 
-const int w = 7;
-const int h = 5;
-int map[w * h];
 
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
@@ -118,7 +94,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	player.pos = Vector3(5.f, 0, -16.5f);
 	player.setModelPos(Vector3(5.f, 0, -16.5f));
-	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
+
+	my_world.loadMap("data/Assets/mapa_3d.csv");
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
@@ -225,7 +202,7 @@ void Game::render(void)
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
 	
-	renderMap(map,w,h);
+	renderMap(my_world.map,my_world.w,my_world.h);
 
 	//Draw the floor grid
 	drawGrid();

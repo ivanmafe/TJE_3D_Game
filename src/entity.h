@@ -11,6 +11,13 @@ public:
 	Vector3 pos;
 	float speed = 0.015f;
 
+	/* For future battle interaction (enemies and hero have these)
+	float life = 100;
+	float att_speed = 0.5;
+	float light_dmg = 25;
+	float heavy_dmg = 40;
+	*/
+
 	Entity();
 	void movePos(Vector3 p);
 	void changeView(float v);
