@@ -1,14 +1,8 @@
 #include "world.h"
 #include "utils.h"
 
-bool World::loadMap(std::string filesrc) {
 
-	int* aux_map = readCSV(filesrc);
-	if (aux_map != 0) return true;
-	else return false;
-}
-
-int* World::readCSV(std::string filesrc) { //archivo y tamaño de area
+bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 	
 	std::fstream file;
 	file.open(filesrc, std::fstream::in);
@@ -40,4 +34,5 @@ int* World::readCSV(std::string filesrc) { //archivo y tamaño de area
 			}
 		}
 	}
+	return true;
 }

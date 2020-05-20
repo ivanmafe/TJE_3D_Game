@@ -11,7 +11,6 @@ public:
 	int * map = NULL;
 	
 	bool loadMap(std::string filesrc);
-	int* readCSV(std::string filesrc);
 
 };
 
