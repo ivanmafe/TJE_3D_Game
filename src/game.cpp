@@ -26,6 +26,10 @@ float speed = 0.05;
 Entity player;
 Entity dog;
 
+///////////////////////
+Entity casa;
+///////////////////////
+
 World my_world;
 
 Game* Game::instance = NULL;
@@ -43,6 +47,9 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	this->window = window;
 	instance = this;
 	must_exit = false;
+
+	player.speed = 0.05;
+
 
 	fps = 0;
 	frame = 0;
@@ -89,14 +96,21 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
+
+
+	casa.mesh = Mesh::Get("data/Assets/Meshes/casa1.obj");
+	casa.texture = Texture::Get("data/Assets/Textures/casa1.png");
 	
 	/*
 	meshes[9] = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 	*/
 
-	player.pos = Vector3(5.f, 0, -16.5f);
-	player.setModelPos(Vector3(5.f, 0, -16.5f));
+	player.pos = Vector3(114.f, 0, -32.5f);
+	player.setModelPos(Vector3(114.f, 0, -32.5f));
+
+	casa.pos = Vector3(110.f, 0, -32.5f);
+	casa.setModelPos(Vector3(110.f, 0, -32.5f));
 
 	my_world.loadMap("data/Assets/Big_map.csv");
 
@@ -108,29 +122,29 @@ void chooseModel(Matrix44 * m, int tile, int * index) {
 
 	Vector3 pos = m->getTranslation();
 	m->setIdentity();
-	
+	m->scale(1.f, 1.f, 1.f);
 	/*
 	if (tile == 11) *index = 0; //SUELO
 	else if (tile == 8) *index = 7;
 	
-	else*/ if (tile == 0) { *index = 1; } //ESQUINAS
-	else if (tile == 2) { *index = 1; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); }
-	else if (tile == 20) { *index = 1; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
-	else if (tile == 22) { *index = 1; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); }
+	else*/ if (tile == 0) { *index = 1; m->scale(1.f, 2.f, 1.f);} //ESQUINAS
+	else if (tile == 2) { *index = 1; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 20) { *index = 1; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 22) { *index = 1; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
 	
-	else if (tile == 13) { *index = 2; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); } //CONTRA-ESQUINAS
-	else if (tile == 3) { *index = 2; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0));}
-	else if (tile == 14) { *index = 2; }
-	else if (tile == 4) { *index = 2; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
+	else if (tile == 13) { *index = 2; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);} //CONTRA-ESQUINAS
+	else if (tile == 3) { *index = 2; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 14) { *index = 2; m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 4) { *index = 2; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
 
-	else if (tile == 10) { *index = 3; } //PARED
-	else if (tile == 21) { *index = 3; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); }
-	else if (tile == 1) { *index = 3; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); }
-	else if (tile == 12) { *index = 3; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); }
+	else if (tile == 10) { *index = 3; m->scale(1.f, 2.f, 1.f);}//PARED
+	else if (tile == 21) { *index = 3; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 1) { *index = 3; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
+	else if (tile == 12) { *index = 3; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f);}
 
 	else if (tile == 5) { *index = 4; } //CASCADA-ESQUINAS
 	else if (tile == 6) { *index = 5; }
-	else if (tile == 7) { *index = 6; }
+	else if (tile == 7) { *index = 6; m->scale(1.f, 1.2f, 1.f);}
 	else *index = -1;
 
 	m->translateGlobal(pos.x, pos.y, pos.z);
@@ -201,8 +215,8 @@ void Game::render(void)
 	
 	if(!free_cam){
 
-		camera->eye = player.pos + Vector3(0, 1.3, 0.5);
-		camera->center = player.model * Vector3(0,0,-1);
+		camera->eye = player.model * Vector3(0, 1.25, 1);   //0,1.3,0.5   //0.5 GUAY
+		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
 	
 	//set the clear color (the background color)
@@ -222,6 +236,7 @@ void Game::render(void)
 
 	renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
+	renderMesh(casa.model, casa.mesh, casa.texture);
 
 	Matrix44 m;
 	m.scale(100, 0, 100);
