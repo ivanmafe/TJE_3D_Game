@@ -16,7 +16,7 @@ void Entity::changeView(float v) {
 
 	model.m[12] = 0;
 	model.m[14] = 0;
-	
+
 	model.rotate(v * DEG2RAD, Vector3(0,1,0));
 	
 	model.m[12] = t.x;

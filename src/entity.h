@@ -1,6 +1,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include "mesh.h"
+#include "texture.h"
 #include "utils.h"
 #include <string>
 
@@ -11,6 +13,8 @@ public:
 	Vector3 pos;
 	float speed = 0.015f;
 
+	Mesh * mesh;
+	Texture * texture;
 	/* For future battle interaction (enemies and hero have these)
 	float life = 100;
 	float att_speed = 0.5;

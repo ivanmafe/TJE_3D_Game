@@ -336,7 +336,7 @@ void Mesh::renderInstanced(unsigned int primitive, const Matrix44* instanced_mod
 	}
 
 	//regular render
-	render(primitive, 0, num_instances);
+	render(primitive, -1, num_instances);
 
 	//disable instanced attribs
 	for (int k = 0; k < 4; ++k)
