@@ -170,6 +170,7 @@ void renderMap(int * map, int w, int h) {
 	shader_instanced->enable();
 	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
 
 	int ind = 0;
 	for (int i = 0; i < h; ++i)
