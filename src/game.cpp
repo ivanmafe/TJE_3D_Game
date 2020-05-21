@@ -8,15 +8,16 @@
 #include "animation.h"
 
 //own includes
-#include <fstream>
-#include <sstream>
-#include "entity.h"
 
+#include "entity.h"
+#include "world.h"
+#include "stage.h"
 
 #include <cmath>
 
 //some globals
 Shader* shader = NULL;
+Shader* shader_instanced = NULL;
 Animation* anim = NULL;
 float angle = 0;
 
@@ -25,38 +26,14 @@ float speed = 0.05;
 Entity player;
 Entity dog;
 
+World my_world;
+
 Game* Game::instance = NULL;
 
-
-int* readCSV(std::string filesrc, int size) { //archivo y tamaño de area
-	int pos = 0;
-	int* mapborder = new int[size];
-	std::fstream file;
-	file.open(filesrc, std::fstream::in);
-	if (!file.is_open()) {
-		fprintf(stderr, "Error locating the file map");
-	}
-	int aux = 0;
-	while (file.good()) {
-		std::string line;
-		while (getline(file, line)) {   // get a whole line
-			std::stringstream ss(line);
-			while (getline(ss, line, ',')) {
-				int aux;
-				std::istringstream(line) >> aux;
-				mapborder[pos++] = aux;
-			}
-		}
-	}
-	return mapborder;
-}
 
 Mesh * meshes[20];
 Texture * textures[20];
 
-const int w = 7;
-const int h = 5;
-int map[w * h];
 
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
@@ -85,6 +62,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
+	shader_instanced = Shader::Get("data/shaders/instanced.vs", "data/shaders/texture.fs");
 
 	//SUELO
 	meshes[0] = Mesh::Get("data/Assets/Meshes/ground.obj");
@@ -101,24 +79,26 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	//OTROS
 	meshes[4] = Mesh::Get("data/Assets/Meshes/cartel_misiones.obj");
 	textures[4] = Texture::Get("data/Assets/Textures/cartel_misiones.png");
-	meshes[5] = Mesh::Get("data/Assets/Meshes/charco.obj");
-	textures[5] = Texture::Get("data/Assets/Textures/charco.png");
+	meshes[5] = Mesh::Get("data/Assets/Meshes/vacio.obj");
+	textures[5] = Texture::Get("data/Assets/Textures/vacio.png");
 	meshes[6] = Mesh::Get("data/Assets/Meshes/casa1.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/casa1.png");
 
-	meshes[8] = Mesh::Get("data/Assets/Meshes/hero.obj");
-	textures[8] = Texture::Get("data/Assets/Textures/hero.tga");
+	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
+	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
+	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
+	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
+	
+	/*
 	meshes[9] = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
-
-
-	meshes[10] = Mesh::Get("data/Assets/Meshes/Dog.obj");
-	textures[10] = Texture::Get("data/Assets/Textures/Dog.tga");
+	*/
 
 	player.pos = Vector3(5.f, 0, -16.5f);
 	player.setModelPos(Vector3(5.f, 0, -16.5f));
-	memcpy(&map, readCSV("data/Assets/mapa_3d.csv", (w * h)), w * h * sizeof(int));
+
+	my_world.loadMap("data/Assets/Big_map.csv");
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
@@ -128,10 +108,11 @@ void chooseModel(Matrix44 * m, int tile, int * index) {
 
 	Vector3 pos = m->getTranslation();
 	m->setIdentity();
+	
 	/*
 	if (tile == 11) *index = 0; //SUELO
 	else if (tile == 8) *index = 7;
-
+	
 	else*/ if (tile == 0) { *index = 1; } //ESQUINAS
 	else if (tile == 2) { *index = 1; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); }
 	else if (tile == 20) { *index = 1; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));}
@@ -180,7 +161,16 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 
 void renderMap(int * map, int w, int h) {
 
-	std::vector<Matrix44> models; 
+	Camera* camera = Camera::current;
+
+	std::vector<Matrix44> test;
+
+	std::vector<std::vector<Matrix44>> models(20); 
+	glDisable(GL_CULL_FACE);
+	shader_instanced->enable();
+	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
 
 	int ind = 0;
 	for (int i = 0; i < h; ++i)
@@ -189,21 +179,34 @@ void renderMap(int * map, int w, int h) {
 			m.translateGlobal(4.*i + 2, 0, -4.*j -2);
 			int tmp = map[i * w + j];
 			chooseModel(&m, tmp, &ind);
-			if(ind != -1)renderMesh(m, meshes[ind], textures[ind]);
-
+			if (ind != -1) models[ind].push_back(m);
 		}
-	//meshes[0]->renderInstanced(GL_TRIANGLES, -1 , );
+
+	for (int i = 0; i < models.size(); ++i){
+		if (models[i].size() != 0) {
+			shader_instanced->setUniform("u_texture", textures[i]);
+			meshes[i]->renderInstanced(GL_TRIANGLES, &models[i][0], models[i].size());
+		}
+	}
+	shader_instanced->disable();
+
+
 }
 
+
+Vector3 camera_offset = Vector3(0,0,-1);
 //what to do when the image has to be draw
 void Game::render(void)
 {
+	
 	if(!free_cam){
-		camera->eye = player.model * Vector3(0, 1.3, 0.5);
+
+		camera->eye = player.pos + Vector3(0, 1.3, 0.5);
 		camera->center = player.model * Vector3(0,0,-1);
 	}
+	
 	//set the clear color (the background color)
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.52, 0.8, 0.92, 1.0);
 
 	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,15 +220,15 @@ void Game::render(void)
 	glEnable(GL_CULL_FACE);
    
 
-	renderMesh(player.model, meshes[8], textures[8]);
-	renderMesh(dog.model, meshes[10], textures[10]);
+	renderMesh(player.model, player.mesh, player.texture);
+	renderMesh(dog.model, dog.mesh, dog.texture);
 
 	Matrix44 m;
 	m.scale(100, 0, 100);
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
 	
-	renderMap(map,w,h);
+	renderMap(my_world.map, my_world.w, my_world.h);
 
 	//Draw the floor grid
 	drawGrid();
@@ -241,6 +244,7 @@ void Game::update(double seconds_elapsed)
 {
 
 	if (Input::isKeyPressed(SDL_SCANCODE_V)) free_cam = !free_cam;
+
 	if (!free_cam) {
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
@@ -252,15 +256,20 @@ void Game::update(double seconds_elapsed)
 			dog.movePos(Vector3(0.f, 0.f, 1.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
-			player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
-			dog.movePos(Vector3(-1.f, 0.f, 0.f) * dog.speed);
+			
+			player.changeView(-1.0f); dog.changeView(-1.0f);
+			//player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
+			//dog.movePos(Vector3(-1.f, 0.f, 0.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
-			player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
-			dog.movePos(Vector3(1.f, 0.f, 0.f) * dog.speed);
+			//player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
+			//dog.movePos(Vector3(1.f, 0.f, 0.f) * dog.speed);
+			player.changeView(1.0f); dog.changeView(1.0f);
 		}
-		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) { player.changeView(-1.0f); dog.changeView(-1.0f); }
-		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) { player.changeView(1.0f); dog.changeView(1.0f);  }
+
+
+		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {}
+		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) {}
 		
 		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
 		dog.setModelPos(aux);
@@ -343,4 +352,3 @@ void Game::onResize(int width, int height)
 	window_width = width;
 	window_height = height;
 }
-
