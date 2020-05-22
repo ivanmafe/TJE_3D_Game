@@ -16,8 +16,8 @@ public:
 	float angle;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Mesh* mesh;
-	Texture* texture;
+	Mesh * mesh = NULL;
+	Texture * texture = NULL;
 	/* For future battle interaction (enemies and hero have these)
 	float life = 100;
 	float att_speed = 0.5;
