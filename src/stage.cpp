@@ -18,7 +18,8 @@ PlayStage::PlayStage() : Stage("PlayStage") {
 };
 
 void PlayStage::render() {
-	drawText(2,20,"PlayStage",Vector3(1,1,1),5);
+	
+	drawText(2,10,"[M] to open menu",Vector3(1,1,1),3);
 };
 
 void PlayStage::update() {};
@@ -32,7 +33,7 @@ MenuStage::MenuStage() : Stage("MenuStage") {
 
 void MenuStage::render() {
 	drawText(2, 20, "Menu", Vector3(1, 1, 1), 5);
-	drawText(2, 70, "Press [S] to save", Vector3(1, 1, 1), 3);
+	drawText(2, 70, "Press [V] to debug", Vector3(1, 1, 1), 3);
 	drawText(2, 100, "Press [ESC] to exit", Vector3(1, 1, 1), 3);
 };
 
@@ -89,7 +90,6 @@ void DebugStage::update() {
 	if (Input::isKeyPressed(SDL_SCANCODE_S) || Input::isKeyPressed(SDL_SCANCODE_DOWN)) camera->move(Vector3(0.0f, 0.0f, -1.0f) * camera_speed);
 	if (Input::isKeyPressed(SDL_SCANCODE_A) || Input::isKeyPressed(SDL_SCANCODE_LEFT)) camera->move(Vector3(1.0f, 0.0f, 0.0f) * camera_speed);
 	if (Input::isKeyPressed(SDL_SCANCODE_D) || Input::isKeyPressed(SDL_SCANCODE_RIGHT)) camera->move(Vector3(-1.0f, 0.0f, 0.0f) * camera_speed);
-
 };
 
 ///////////////////////////////////////////////////
