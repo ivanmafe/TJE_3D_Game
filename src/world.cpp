@@ -28,7 +28,7 @@ void chooseModel(Matrix44 * m, int tile, int * index) {
 
 	else if (tile == 5) { *index = 4; } //CASCADA-ESQUINAS
 	else if (tile == 6) { *index = 5; }
-	else if (tile == 7) { *index = 6; m->scale(1.f, 1.2f, 1.f); }
+	else if (tile == 7) { *index = 6; m->scale(1.f, 1.2f, 1.f);}
 	else *index = -1;
 	m->translateGlobal(pos.x, pos.y, pos.z);
 }

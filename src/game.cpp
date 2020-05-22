@@ -188,7 +188,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[8] = Texture::Get("data/Assets/Textures/hierba.png");
 
 	meshes[9] = Mesh::Get("data/Assets/Meshes/arbol verde.obj");
-	textures[9] = Texture::Get("data/Assets/Textures/arbol verde.png");
+	textures[9] = Texture::Get("data/Assets/Textures/arbol_verde.png");
 
 	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
@@ -203,7 +203,11 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	
 	player.pos = Vector3(114.f, 0, -32.5f);
 	player.setModelPos(Vector3(114.f, 0, -32.5f));
-	
+
+	ghost.pos = Vector3(109.f, 0, -36.f);
+	ghost.setModelPos(Vector3(109.f, 0, -36.f));
+	ghost.model.rotate(-60 * DEG2RAD, Vector3(0, 1, 0));
+	ghost.model.scale(0.75, 0.75, 0.75);
 
 	my_world.loadMap("data/Assets/Big_map.csv");
 	generateMap(my_world.map, my_world.w, my_world.h);
@@ -228,6 +232,8 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 	shader->setUniform("u_texture", texture);
 	shader->setUniform("u_model", m);
 	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
+	shader->setUniform("u_camera_position", camera->eye);
+	
 	//shader->setUniform("u_time", time);
 
 	
@@ -246,7 +252,7 @@ void renderMap(int * map, int w, int h) {
 	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
 	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
-
+	shader_instanced->setUniform("u_camera_position", camera->eye);
 
 	for (int i = 0; i < models.size(); ++i){
 		if (models[i].size() != 0) {
@@ -289,7 +295,7 @@ void Game::render(void)
 	shader_blanc->enable();
 
 	//upload uniforms
-	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1) * 0.6);
 	shader_blanc->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_blanc->setUniform("u_texture", textures[7]);
 	shader_blanc->setUniform("u_model", m2);
@@ -307,6 +313,7 @@ void Game::render(void)
 
 	renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
+	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
 	Matrix44 m;
 	m.scale(100, 0, 100);
@@ -320,6 +327,7 @@ void Game::render(void)
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
+
 }
 
 
@@ -328,13 +336,23 @@ void Game::update(double seconds_elapsed)
 
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) {
-		if(free_cam) Stage::current_stage->changeStage("PlayStage");
-		else Stage::current_stage->changeStage("DebugStage");
-		free_cam = !free_cam;
+		if (free_cam) {
+			Stage::current_stage->changeStage("MenuStage");
+			free_cam = false;
+		}
+		else {
+			Stage::current_stage->changeStage("DebugStage");
+			isMenu = false;
+			free_cam = true;
+		}
 	}
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_M)) {
-		if (!isMenu) {
+		if (free_cam) {
+			Stage::current_stage->changeStage("MenuStage");
+			free_cam = false;
+		}
+		else if (!isMenu) {
 			Stage::current_stage->changeStage("MenuStage");
 			isMenu = true;
 		}
@@ -380,7 +398,7 @@ void Game::update(double seconds_elapsed)
 	
 
 		//calculamos el centro de la esfera de colisión del player elevandola hasta la cintura
-		Vector3 character_center = targetpos + Vector3(0, 1, 0);
+		Vector3 character_center = targetpos + Vector3(0, 0.3, 0);
 
 		bool hascollision = false;
 
@@ -388,6 +406,7 @@ void Game::update(double seconds_elapsed)
 		
 		std::vector<Entity> collidable = getNearEntities(player.pos.x, -player.pos.z);
 		collidable.insert(collidable.end(), trees.begin(), trees.end());
+		collidable.push_back(ghost);
 		int size = collidable.size();
 
 		for (int i = 0; i < size; i++) {
