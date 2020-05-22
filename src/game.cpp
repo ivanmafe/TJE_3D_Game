@@ -183,7 +183,7 @@ void renderMap(int * map, int w, int h) {
 	std::vector<Matrix44> test;
 
 	std::vector<std::vector<Matrix44>> models(20); 
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 	shader_instanced->enable();
 	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
