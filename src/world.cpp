@@ -33,7 +33,11 @@ void chooseModel(Matrix44 * m, int tile, int * index) {
 	m->translateGlobal(pos.x, pos.y, pos.z);
 }
 
-bool World::isCellEmpty(int x, int y) {
+bool World::isCellEmpty(float pos_x, float pos_y) {
+
+	int x = (int)floor(pos_x) / 4;
+	int y = (int)floor(pos_y) / 4;
+
 	int val = map[x * w + y];
 	int t[] = { 0, 2, 20 , 22 , 13, 14 , 3, 4, 10, 21, 21 , 1 , 12 , 5, 6, 7 };
 	for (int i = 0; i < 16; i++)

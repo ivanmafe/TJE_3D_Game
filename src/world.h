@@ -13,7 +13,7 @@ public:
 	int h;
 	int * map = NULL;
 
-	bool isCellEmpty(int x, int y);
+	bool isCellEmpty(float pos_x, float pos_y);
 	bool loadMap(std::string filesrc);
 
 };
