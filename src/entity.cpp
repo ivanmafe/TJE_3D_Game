@@ -1,7 +1,8 @@
 #include "entity.h"
 #include "utils.h"
 
-Entity::Entity() {
+Entity::Entity() { 
+	angle = 0.0; 
 }
 
 void Entity::movePos(Vector3 p) {

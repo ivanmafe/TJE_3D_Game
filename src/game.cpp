@@ -21,13 +21,15 @@ Shader* shader_instanced = NULL;
 Animation* anim = NULL;
 float angle = 0;
 
-bool free_cam = true;
+bool free_cam = false;
 float speed = 0.05;
 Entity player;
 Entity dog;
 
 ///////////////////////
 Entity casa;
+Entity* casas[3];
+
 ///////////////////////
 
 World my_world;
@@ -48,8 +50,9 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	instance = this;
 	must_exit = false;
 
-	player.speed = 0.05;
+	player.speed = 5;
 
+	casas[0] = &casa;
 
 	fps = 0;
 	frame = 0;
@@ -210,6 +213,9 @@ void renderMap(int * map, int w, int h) {
 
 Vector3 camera_offset = Vector3(0,0,-1);
 //what to do when the image has to be draw
+
+
+
 void Game::render(void)
 {
 	
@@ -261,26 +267,88 @@ void Game::update(double seconds_elapsed)
 	if (Input::isKeyPressed(SDL_SCANCODE_V)) free_cam = !free_cam;
 
 	if (!free_cam) {
+		////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Vector3 targetpos = player.pos; 
+		Matrix44 R;
+		R.setRotation(player.angle * DEG2RAD, Vector3(0, 1, 0));
+		Vector3 front = R.rotateVector(Vector3(0, 0, -1));
+		Vector3 Right = R.rotateVector(Vector3(1, 0, -0));
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
-			player.movePos(Vector3(0.f,0.f,-1.f) * player.speed);
-			dog.movePos(Vector3(0.f, 0.f, -1.f) * dog.speed);
+			//player.movePos(Vector3(0.f,0.f,-1.f) * player.speed * seconds_elapsed);
+			targetpos = player.pos + front * player.speed * seconds_elapsed;
+			dog.movePos(Vector3(0.f, 0.f, -1.f) * dog.speed * seconds_elapsed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
-			player.movePos(Vector3(0.f, 0.f, 1.f) * player.speed);
-			dog.movePos(Vector3(0.f, 0.f, 1.f) * dog.speed);
+			//player.movePos(Vector3(0.f, 0.f, 1.f) * player.speed * seconds_elapsed);
+			
+			targetpos = player.pos - front * player.speed * seconds_elapsed;
+			dog.movePos(Vector3(0.f, 0.f, 1.f) * dog.speed * seconds_elapsed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
-			
-			player.changeView(-1.0f); dog.changeView(-1.0f);
+			//player.changeView(-1.0f); 
+			player.angle -= 90 * seconds_elapsed;
+			dog.changeView(-1.0f);
 			//player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
 			//dog.movePos(Vector3(-1.f, 0.f, 0.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+
+			player.angle += 90 * seconds_elapsed;
 			//player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
 			//dog.movePos(Vector3(1.f, 0.f, 0.f) * dog.speed);
-			player.changeView(1.0f); dog.changeView(1.0f);
+			//player.changeView(1.0f); 
+
+			dog.changeView(1.0f);
 		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//COLISIONES	
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+
+		//calculamos el centro de la esfera de colisión del player elevandola hasta la cintura
+		Vector3 character_center = targetpos + Vector3(0, 1, 0);
+
+		bool hascollision = false;
+
+		//para cada objecto de la escena...
+		
+		for (int i = 0; i < 1; i++) {
+
+			Entity* ent = casas[0];
+			Mesh* mesh = ent->mesh;
+
+
+			//comprobamos si colisiona el objeto con la esfera (radio 3)
+			Vector3 coll;
+			Vector3 collnorm;
+			if (mesh->testSphereCollision(ent->model, character_center, 0.1, coll, collnorm) == false)
+				continue; //si no colisiona, pasamos al siguiente objeto
+			hascollision = true;
+			Vector3 contrapush = normalize(coll - character_center) * seconds_elapsed;   ///faltaria interpolar la posicion actual con la del rebote para que no tiemble tanto
+
+			targetpos = player.pos - contrapush;
+			targetpos.y = 0;
+			break;
+			//si la esfera está colisionando muevela a su posicion anterior alejandola del objeto
+
+
+		}
+		player.pos = targetpos;
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+		player.model.setIdentity();
+		player.model.setTranslation(player.pos.x, player.pos.y, player.pos.z);
+		player.model.rotate(player.angle * DEG2RAD, Vector3(0, 0.5f, 0));
 
 
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {}
