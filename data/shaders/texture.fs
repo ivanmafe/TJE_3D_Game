@@ -22,7 +22,7 @@ void main()
 	vec3 N = normalize(v_normal);
 	vec3 L = normalize(u_light_direction);
 	float NdotL = clamp( dot(N,L), 0.0, 1.0);
-	NdotL = round(NdotL * 28.0) / 28.0;
+	//NdotL = round(NdotL * 28.0) / 28.0;
 	vec3 light = NdotL * vec3(1.0, 1.0, 1.0) * 0.8;
 	// we add some ambient light
 	light += vec3(0.3,0.3,0.3) * 1.4;

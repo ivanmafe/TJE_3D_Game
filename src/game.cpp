@@ -170,6 +170,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[6] = Mesh::Get("data/Assets/Meshes/casa1.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/casa1.png");
 
+
+	meshes[7] = Mesh::Get("data/Assets/Meshes/cielo.ase");
+	textures[7] = Texture::Get("data/Assets/Textures/cielo0.png");
+
 	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
@@ -208,7 +212,7 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_texture", texture);
 	shader->setUniform("u_model", m);
-	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
+	shader->setUniform("u_light_direction", Vector3(my_world.w/2, 8, my_world.h/2));
 	//shader->setUniform("u_time", time);
 	mesh->render(GL_TRIANGLES);
 
@@ -224,7 +228,7 @@ void renderMap(int * map, int w, int h) {
 	shader_instanced->enable();
 	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
-	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
+	shader_instanced->setUniform("u_light_direction", Vector3(my_world.w / 2, 8, my_world.h / 2));
 
 
 	for (int i = 0; i < models.size(); ++i){
@@ -248,17 +252,32 @@ void Game::render(void)
 		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
 	
+
+
+
 	//set the clear color (the background color)
-	glClearColor(0.52, 0.8, 0.92, 1.0);
+	//glClearColor(0.52, 0.8, 0.92, 1.0);
 
 	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+
 
 	//set the camera as default
 	camera->enable();
 
 	//set flags
 	glDisable(GL_BLEND);
+
+	//////////////////////////////////////////////////////////////////////pintar cielo
+	glDisable(GL_DEPTH_TEST);
+	Matrix44 m2;
+	m2.setIdentity();
+	renderMesh(m2, meshes[7], textures[7]);
+	//////////////////////////////////////////////////////////////////////
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
@@ -270,7 +289,9 @@ void Game::render(void)
 	m.scale(100, 0, 100);
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
-	
+
+
+
 	renderMap(my_world.map, my_world.w, my_world.h);
 
 	//Draw the floor grid
@@ -278,6 +299,9 @@ void Game::render(void)
 
 	//render the FPS, Draw Calls, etc
 	drawText(2, 2, getGPUStats(), Vector3(1, 1, 1), 2);
+
+
+
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
@@ -357,7 +381,7 @@ void Game::update(double seconds_elapsed)
 			//comprobamos si colisiona el objeto con la esfera (radio 3)
 			Vector3 coll;
 			Vector3 collnorm;
-			if (mesh->testSphereCollision(ent.model, character_center, 0.1, coll, collnorm) == false)
+			if (mesh->testSphereCollision(ent.model, character_center, 0.2, coll, collnorm) == false)
 				continue; //si no colisiona, pasamos al siguiente objeto
 			hascollision = true;
 			Vector3 contrapush = normalize(coll - character_center) * seconds_elapsed;   ///faltaria interpolar la posicion actual con la del rebote para que no tiemble tanto
