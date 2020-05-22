@@ -30,6 +30,7 @@ Entity dog;
 ///////////////////////
 
 std::vector<Entity> tiles;
+std::vector<Entity> trees;
 std::vector<std::vector<Matrix44>> models(20);
 
 
@@ -121,6 +122,37 @@ void generateMap(int * map, int w, int h) {
 			if (ind != -1) models[ind].push_back(m);
 			
 		}
+
+
+	for (int x = 0; x < 128; x++) 
+		for (int z = 0; z < 128; z++) {
+			if ((rand() % 100) < 98) {
+				continue;
+			}
+			Entity ent;
+			ent.model.setTranslation(x, 0, -z);
+			//float s = 10 + random() * 4.0;
+			ent.model.rotate(random() * PI, Vector3(0, 1, 0));
+			ent.model.scale(1.5, 1.5, 1.5);
+			models[9].push_back(ent.model);
+			ent.mesh = meshes[9];
+			ent.texture = textures[9];
+			trees.push_back(ent);
+		}
+
+
+	for (int x = 0; x < 128; x++)
+		for (int z = 0; z < 128; z++) {
+			if ((rand() % 100) < 90) {
+				continue;
+			}
+			Matrix44 model;
+			model.setTranslation(x, 0, -z);
+			//float s = 10 + random() * 4.0;
+			model.rotate(random() * PI, Vector3(0, 1, 0));
+			models[8].push_back(model);
+			//ent.model.scale(s, s, s);
+		}
 }
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
@@ -177,6 +209,15 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	meshes[7] = Mesh::Get("data/Assets/Meshes/cielo.ase");
 	textures[7] = Texture::Get("data/Assets/Textures/cielo0.png");
+
+
+
+
+	meshes[8] = Mesh::Get("data/Assets/Meshes/hierba.obj");
+	textures[8] = Texture::Get("data/Assets/Textures/hierba.png");
+
+	meshes[9] = Mesh::Get("data/Assets/Meshes/arbol verde.obj");
+	textures[9] = Texture::Get("data/Assets/Textures/arbol verde.png");
 
 	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
@@ -286,6 +327,8 @@ void Game::render(void)
 
 	//////////////////////////////////////////////////////////////////////
 
+	
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
@@ -299,6 +342,8 @@ void Game::render(void)
 	renderMesh(m, meshes[0], textures[0]);
 
 	renderMap(my_world.map, my_world.w, my_world.h);
+
+	
 
 	//Draw the floor grid
 	drawGrid();
@@ -358,7 +403,7 @@ void Game::update(double seconds_elapsed)
 		//para cada objecto de la escena...
 		
 		std::vector<Entity> collidable = getNearEntities(player.pos.x, -player.pos.z);
-
+		collidable.insert(collidable.end(), trees.begin(), trees.end());
 		int size = collidable.size();
 
 		for (int i = 0; i < size; i++) {
