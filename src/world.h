@@ -10,6 +10,7 @@ public:
 	int h;
 	int * map = NULL;
 
+	bool isCellEmpty(int x, int y);
 	bool loadMap(std::string filesrc);
 
 };

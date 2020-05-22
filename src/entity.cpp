@@ -2,7 +2,7 @@
 #include "utils.h"
 
 Entity::Entity() { 
-	angle = 0.0; 
+	//empty constructor (if needed)
 }
 
 void Entity::movePos(Vector3 p) {
@@ -28,4 +28,8 @@ void Entity::setModelPos(Vector3 p) {
 	model.m[12] = p.x;
 	model.m[13] = p.y;
 	model.m[14] = p.z;
+}
+
+Player::Player() {
+
 }

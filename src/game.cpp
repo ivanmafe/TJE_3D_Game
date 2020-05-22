@@ -18,6 +18,7 @@
 //some globals
 Shader* shader = NULL;
 Shader* shader_instanced = NULL;
+Shader* shader_blanc = NULL;
 Animation* anim = NULL;
 float angle = 0;
 
@@ -31,12 +32,14 @@ Entity dog;
 std::vector<Entity> tiles;
 std::vector<std::vector<Matrix44>> models(20);
 
+
+std::map<std::string, Stage*> Stage::stages;
+Stage* Stage::current_stage = NULL;
 ///////////////////////
 
 World my_world;
-
+PlayStage play;
 Game* Game::instance = NULL;
-
 Mesh * meshes[20];
 Texture * textures[20];
 
@@ -47,19 +50,20 @@ std::vector<Entity> getNearEntities(float pos_x , float pos_y) {
 	
 	std::vector<Entity> nearby;
 
+
 	nearby.push_back(tiles[x * my_world.w + y]);
-	if (x > 0) nearby.push_back(tiles[(x - 1) * my_world.w + y]);
-	if (x < my_world.h) nearby.push_back(tiles[(x + 1)  * my_world.w + y]);
+	if (x-1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + y]);
+	if (x+1 < my_world.w ) nearby.push_back(tiles[(x + 1)  * my_world.w + y]);
 	
-	if (y > 0) {
+	if (y - 1 >= 0) {
 		nearby.push_back(tiles[x * my_world.w + (y - 1)]);
-		if (x > 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y - 1)]);
-		if (x < my_world.h) nearby.push_back(tiles[(x + 1)  * my_world.w + (y - 1)]);
+		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y - 1)]);
+		if (x + 1 < my_world.w) nearby.push_back(tiles[(x + 1)  * my_world.w + (y - 1)]);
 	}
-	if (y < my_world.w) {
+	if (y + 1 < my_world.w) {
 		nearby.push_back(tiles[x * my_world.w + (y + 1)]);
-		if (x > 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y + 1)]);
-		if (x < my_world.h) nearby.push_back(tiles[(x + 1)  * my_world.w + (y + 1)]);
+		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y + 1)]);
+		if (x + 1 < my_world.w) nearby.push_back(tiles[(x + 1)  * my_world.w + (y + 1)]);
 	}
 	/*
 	for(int i = 0 ; i < nearby.size() ; ++i)
@@ -67,7 +71,6 @@ std::vector<Entity> getNearEntities(float pos_x , float pos_y) {
 		*/
 	return nearby;
 }
-
 
 void chooseModel(Matrix44 * m, int tile, int * index) {
 
@@ -149,6 +152,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	// example of shader loading using the shaders manager
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 	shader_instanced = Shader::Get("data/shaders/instanced.vs", "data/shaders/texture.fs");
+	shader_blanc = Shader::Get("data/shaders/basic.vs", "data/shaders/sky.fs");
 
 	//SUELO
 	meshes[0] = Mesh::Get("data/Assets/Meshes/ground.obj");
@@ -251,19 +255,11 @@ void Game::render(void)
 		camera->eye = player.model * Vector3(0, 1.25, 1);   //0,1.3,0.5   //0.5 GUAY
 		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
-	
-
-
 
 	//set the clear color (the background color)
 	//glClearColor(0.52, 0.8, 0.92, 1.0);
-
 	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-
-
 
 	//set the camera as default
 	camera->enable();
@@ -271,11 +267,23 @@ void Game::render(void)
 	//set flags
 	glDisable(GL_BLEND);
 
-	//////////////////////////////////////////////////////////////////////pintar cielo
+	////////////////////////////////////////////////////////////////////// pintar cielo
 	glDisable(GL_DEPTH_TEST);
 	Matrix44 m2;
 	m2.setIdentity();
-	renderMesh(m2, meshes[7], textures[7]);
+
+	//enable shader
+	shader_blanc->enable();
+
+	//upload uniforms
+	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader_blanc->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader_blanc->setUniform("u_texture", textures[7]);
+	shader_blanc->setUniform("u_model", m2);
+
+	meshes[7]->render(GL_TRIANGLES);
+	shader_blanc->disable();
+
 	//////////////////////////////////////////////////////////////////////
 
 	glEnable(GL_DEPTH_TEST);
@@ -290,8 +298,6 @@ void Game::render(void)
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
 
-
-
 	renderMap(my_world.map, my_world.w, my_world.h);
 
 	//Draw the floor grid
@@ -300,8 +306,8 @@ void Game::render(void)
 	//render the FPS, Draw Calls, etc
 	drawText(2, 2, getGPUStats(), Vector3(1, 1, 1), 2);
 
-
-
+	//DRAW UI OR STAGE SPECIFIC ELEMENTS
+	Stage::current_stage->render();
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
@@ -326,31 +332,16 @@ void Game::update(double seconds_elapsed)
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
-			//player.movePos(Vector3(0.f,0.f,-1.f) * player.speed * seconds_elapsed);
 			targetpos = player.pos + front * player.speed * seconds_elapsed;
-			dog.movePos(Vector3(0.f, 0.f, -1.f) * dog.speed * seconds_elapsed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
-			//player.movePos(Vector3(0.f, 0.f, 1.f) * player.speed * seconds_elapsed);
-			
 			targetpos = player.pos - front * player.speed * seconds_elapsed;
-			dog.movePos(Vector3(0.f, 0.f, 1.f) * dog.speed * seconds_elapsed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
-			//player.changeView(-1.0f); 
 			player.angle -= 90 * seconds_elapsed;
-			dog.changeView(-1.0f);
-			//player.movePos(Vector3(-1.f, 0.f, 0.f) * player.speed);
-			//dog.movePos(Vector3(-1.f, 0.f, 0.f) * dog.speed);
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
-
 			player.angle += 90 * seconds_elapsed;
-			//player.movePos(Vector3(1.f, 0.f, 0.f) * player.speed);
-			//dog.movePos(Vector3(1.f, 0.f, 0.f) * dog.speed);
-			//player.changeView(1.0f); 
-
-			dog.changeView(1.0f);
 		}
 
 
@@ -406,6 +397,8 @@ void Game::update(double seconds_elapsed)
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {}
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) {}
 		
+		dog.pos = player.pos - Vector3(0.3f, 0, 0.4f);
+		dog.model = player.model;
 		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
 		dog.setModelPos(aux);
 
