@@ -9,7 +9,7 @@ public:
 	int w;
 	int h;
 	int * map = NULL;
-	
+
 	bool loadMap(std::string filesrc);
 
 };
