@@ -7,41 +7,42 @@
 #include "input.h"
 #include "animation.h"
 
-//own includes
-
 #include "entity.h"
 #include "world.h"
 #include "stage.h"
 
 #include <cmath>
 
-//some globals
+//shaders
 Shader* shader = NULL;
 Shader* shader_instanced = NULL;
 Shader* shader_blanc = NULL;
+
+//some globals
 Animation* anim = NULL;
 float angle = 0;
-
 bool free_cam = false;
-float camera_speed = 0.05;
+bool isMenu = false;
+
+//Active Entities
 Entity player;
 Entity dog;
+Entity ghost;
 
-///////////////////////
-
+//Data structures
 std::vector<Entity> tiles;
 std::vector<std::vector<Matrix44>> models(20);
-
-
 std::map<std::string, Stage*> Stage::stages;
-Stage* Stage::current_stage = NULL;
-///////////////////////
-
-World my_world;
-PlayStage play;
-Game* Game::instance = NULL;
 Mesh * meshes[20];
 Texture * textures[20];
+
+//World and Execution
+World my_world;
+Game* Game::instance = NULL;
+Stage* Stage::current_stage = NULL;
+PlayStage play;
+DebugStage debug;
+MenuStage menu;
 
 
 std::vector<Entity> getNearEntities(float pos_x , float pos_y) {
@@ -70,37 +71,6 @@ std::vector<Entity> getNearEntities(float pos_x , float pos_y) {
 		std::cout << "entit" << i << " x:" << nearby[i].model.getTranslation().x / 4 << " z:" << nearby[i].model.getTranslation().z / 4 << '\n';
 		*/
 	return nearby;
-}
-
-void chooseModel(Matrix44 * m, int tile, int * index) {
-
-	Vector3 pos = m->getTranslation();
-	m->setIdentity();
-	m->scale(1.f, 1.f, 1.f);
-	/*
-	if (tile == 11) *index = 0; //SUELO
-	else if (tile == 8) *index = 7;
-
-	else*/ if (tile == 0) { *index = 1; m->scale(1.f, 2.f, 1.f); } //ESQUINAS
-	else if (tile == 2) { *index = 1; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 20) { *index = 1; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 22) { *index = 1; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-
-	else if (tile == 13) { *index = 2; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); } //CONTRA-ESQUINAS
-	else if (tile == 3) { *index = 2; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 14) { *index = 2; m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 4) { *index = 2; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-
-	else if (tile == 10) { *index = 3; m->scale(1.f, 2.f, 1.f); }//PARED
-	else if (tile == 21) { *index = 3; m->translate(0, 0, 0); m->rotate(-90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 1) { *index = 3; m->translate(0, 0, 0); m->rotate(90 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-	else if (tile == 12) { *index = 3; m->translate(0, 0, 0); m->rotate(180 * DEG2RAD, Vector3(0, 1, 0)); m->scale(1.f, 2.f, 1.f); }
-
-	else if (tile == 5) { *index = 4; } //CASCADA-ESQUINAS
-	else if (tile == 6) { *index = 5; }
-	else if (tile == 7) { *index = 6; m->scale(1.f, 1.2f, 1.f); }
-	else *index = -1;
-	m->translateGlobal(pos.x, pos.y, pos.z);
 }
 
 void generateMap(int * map, int w, int h) {
@@ -176,18 +146,17 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 
 	meshes[7] = Mesh::Get("data/Assets/Meshes/cielo.ase");
-	textures[7] = Texture::Get("data/Assets/Textures/cielo0.png");
+	textures[7] = Texture::Get("data/Assets/Textures/Dani_sky2.tga");
 
 	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
-	
-	/*
-	meshes[9] = Mesh::Get("data/Assets/Meshes/Ghost.obj");
-	textures[9] = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
-	*/
+
+	ghost.mesh  = Mesh::Get("data/Assets/Meshes/Ghost.obj");
+	ghost.texture = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
+
 
 	
 	player.pos = Vector3(114.f, 0, -32.5f);
@@ -216,8 +185,10 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader->setUniform("u_texture", texture);
 	shader->setUniform("u_model", m);
-	shader->setUniform("u_light_direction", Vector3(my_world.w/2, 8, my_world.h/2));
+	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
 	//shader->setUniform("u_time", time);
+
+	
 	mesh->render(GL_TRIANGLES);
 
 	//disable shader
@@ -232,7 +203,7 @@ void renderMap(int * map, int w, int h) {
 	shader_instanced->enable();
 	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
-	shader_instanced->setUniform("u_light_direction", Vector3(my_world.w / 2, 8, my_world.h / 2));
+	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
 
 
 	for (int i = 0; i < models.size(); ++i){
@@ -300,12 +271,6 @@ void Game::render(void)
 
 	renderMap(my_world.map, my_world.w, my_world.h);
 
-	//Draw the floor grid
-	drawGrid();
-
-	//render the FPS, Draw Calls, etc
-	drawText(2, 2, getGPUStats(), Vector3(1, 1, 1), 2);
-
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
 	Stage::current_stage->render();
 
@@ -313,13 +278,30 @@ void Game::render(void)
 	SDL_GL_SwapWindow(this->window);
 }
 
+
 void Game::update(double seconds_elapsed)
 {
 
-	if (Input::isKeyPressed(SDL_SCANCODE_V)) free_cam = !free_cam;
 
-	if (!free_cam) {
-		////
+	if (Input::wasKeyPressed(SDL_SCANCODE_V)) {
+		if(free_cam) Stage::current_stage->changeStage("PlayStage");
+		else Stage::current_stage->changeStage("DebugStage");
+		free_cam = !free_cam;
+	}
+
+	if (Input::wasKeyPressed(SDL_SCANCODE_M)) {
+		if (!isMenu) {
+			Stage::current_stage->changeStage("MenuStage");
+			isMenu = true;
+		}
+		else {
+			Stage::current_stage->changeStage("PlayStage");
+			isMenu = false;
+		}
+	}
+
+	if (!free_cam && !isMenu) {
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Vector3 targetpos = player.pos; 
@@ -330,6 +312,9 @@ void Game::update(double seconds_elapsed)
 
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		Stage::current_stage->update();
+
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			targetpos = player.pos + front * player.speed * seconds_elapsed;
@@ -407,24 +392,8 @@ void Game::update(double seconds_elapsed)
 			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
 		}
 	}
-	else {
-		//mouse input to rotate the cam
-		if ((Input::mouse_state & SDL_BUTTON_LEFT) || mouse_locked) //is left button pressed?
-		{
-			camera->rotate(Input::mouse_delta.x * 0.005f, Vector3(0.0f, -1.0f, 0.0f));
-			camera->rotate(Input::mouse_delta.y * 0.005f, camera->getLocalVector(Vector3(-1.0f, 0.0f, 0.0f)));
-		}
-		if (Input::isKeyPressed(SDL_SCANCODE_W) || Input::isKeyPressed(SDL_SCANCODE_UP)) camera->move(Vector3(0.0f, 0.0f, 1.0f) * camera_speed);
-		if (Input::isKeyPressed(SDL_SCANCODE_S) || Input::isKeyPressed(SDL_SCANCODE_DOWN)) camera->move(Vector3(0.0f, 0.0f, -1.0f) * camera_speed);
-		if (Input::isKeyPressed(SDL_SCANCODE_A) || Input::isKeyPressed(SDL_SCANCODE_LEFT)) camera->move(Vector3(1.0f, 0.0f, 0.0f) * camera_speed);
-		if (Input::isKeyPressed(SDL_SCANCODE_D) || Input::isKeyPressed(SDL_SCANCODE_RIGHT)) camera->move(Vector3(-1.0f, 0.0f, 0.0f) * camera_speed);
-		
-		//get camera values
-		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
-			std::cout << "Camera pos: " << camera->eye.x << ',' << camera->eye.y << ',' << camera->eye.z << '\n';
-			std::cout << "Camera dir: " << camera->center.x << ',' << camera->center.y << ',' << camera->center.z << '\n';
-		}
-	}
+	else Stage::current_stage->update();
+	
 
 	if (mouse_locked)
 		Input::centerMouse();

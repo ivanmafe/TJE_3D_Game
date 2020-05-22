@@ -20,12 +20,38 @@ public:
 class PlayStage : public Stage
 {
 public:
-	enum { HOME, STREET_1, LAURA_HOUSE, STREET_2, DAVID_HOUSE, PABLO_HOUSE, SCHOOL };
-	bool can_talk = false;
 	PlayStage();
 	void render();
 	void update();
 };
 
+class MenuStage : public Stage
+{
+public:
+	MenuStage();
+	void render();
+	void update();
+};
 
+class FightStage : public Stage
+{
+public:
+	FightStage();
+	void render();
+	void update();
+};
+
+class DebugStage : public Stage
+{
+public:
+	float camera_speed = 0.05;
+	DebugStage();
+	void render();
+	void update();
+};
+
+
+
+
+//
 #endif

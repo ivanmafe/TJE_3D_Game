@@ -1,8 +1,11 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include "utils.h"
 #include <fstream>
 #include <sstream>
+
+void chooseModel(Matrix44 * m, int tile, int * index);
 
 class World {
 public:
