@@ -17,6 +17,7 @@
 Shader* shader = NULL;
 Shader* shader_instanced = NULL;
 Shader* shader_blanc = NULL;
+Shader* anishader = NULL;
 
 //some globals
 Animation* anim = NULL;
@@ -28,14 +29,18 @@ bool isMenu = false;
 Entity player;
 Entity dog;
 Entity ghost;
+Entity tenosuke;
 
 //Data structures
 std::vector<Entity> tiles;
 std::vector<Entity> trees;
 std::vector<std::vector<Matrix44>> models(20);
 std::map<std::string, Stage*> Stage::stages;
-Mesh * meshes[20];
-Texture * textures[20];
+Mesh * meshes[100];
+Texture * textures[100];
+Animation* tenosukedance;
+Animation* herorun;
+
 
 //World and Execution
 World my_world;
@@ -190,8 +195,17 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	meshes[9] = Mesh::Get("data/Assets/Meshes/arbol verde.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/arbol_verde.png");
 
+
+
+	meshes[10] = Mesh::Get("data/Assets/Meshes/tenosuke_character.mesh");
+	textures[10] = Texture::Get("data/Assets/Textures/tenosuke_piel.png");
+	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_dancing.skanim");
+
+
 	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
+
+	herorun = Animation::Get("data/Assets/animaciones/heroe_fastrun.skanim");
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
@@ -209,12 +223,48 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	ghost.model.rotate(-60 * DEG2RAD, Vector3(0, 1, 0));
 	ghost.model.scale(0.75, 0.75, 0.75);
 
+	tenosuke.pos = Vector3(80.f, 0, -36.f);
+	tenosuke.setModelPos(Vector3(80.f, 0, -36.f));
+	tenosuke.model.scale(0.25, 0.25, 0.25);
+
 	my_world.loadMap("data/Assets/Big_map.csv");
 	generateMap(my_world.map, my_world.w, my_world.h);
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
+
+void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton) {
+
+	Camera* camera = Camera::current;
+	Vector3 pos = m * mesh->box.center;
+
+	BoundingBox global_box = transformBoundingBox(m, mesh->box);
+	if (!camera->testBoxInFrustum(global_box.center, global_box.halfsize)) {
+		return;
+	}
+	glPointSize(5);
+	anishader = Shader::Get("data/shaders/skinning.vs", "data/shaders/textured.fs");
+
+	anishader->enable();
+
+	anishader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	anishader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	if (texture)
+		anishader->setUniform("u_texture", texture);
+	anishader->setUniform("u_model", m);
+	anishader->setUniform("u_texture_tiling", 1.0f);
+	anishader->setUniform("u_time", Game::instance->time);
+	anishader->setUniform("u_camera_position", camera->eye);
+	anishader->setUniform("u_light_direction", Vector3(0.3,0.6,0.2).normalize());
+
+	mesh->renderAnimated(GL_TRIANGLES, skeleton);
+
+	anishader->disable();
+
+
+}
+
 
 void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
 {
@@ -314,6 +364,16 @@ void Game::render(void)
 	renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
+	//renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
+
+	herorun->assignTime(time);
+	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
+	tenosukedance->assignTime(time);
+	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke.model);
+
+	//Skeleton result; //no hacer en local
+	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
+	//result.renderSkeleton(camera, tenosuke.model);
 
 	Matrix44 m;
 	m.scale(100, 0, 100);
