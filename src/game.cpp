@@ -266,7 +266,7 @@ void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton
 }
 
 
-void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = 0)
+void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
 {
 	if (!shader)
 		return;
@@ -364,9 +364,14 @@ void Game::render(void)
 	renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
-	//renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
 
-	herorun->assignTime(time);
+	//herorun->assignTime(time);
+	//renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
+	
+	
+
+
+
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
 	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke.model);
