@@ -4,6 +4,7 @@
 #include "utils.h"
 #include <fstream>
 #include <sstream>
+#include "texture.h"
 
 void chooseModel(Matrix44 * m, int tile, int * index);
 
@@ -14,7 +15,8 @@ public:
 	int * map = NULL;
 
 	bool isCellEmpty(float pos_x, float pos_y);
-	bool loadMap(std::string filesrc);
+	bool loadMap(std::string filesrc); 
+	bool loadVegetation(const char* filesrc);
 
 };
 

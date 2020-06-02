@@ -45,6 +45,7 @@ bool World::isCellEmpty(float pos_x, float pos_y) {
 	return true;
 }
 
+
 bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 	
 	std::fstream file;
@@ -77,5 +78,10 @@ bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 			}
 		}
 	}
+	return true;
+}
+
+bool World::loadVegetation(const char* filesrc) {
+
 	return true;
 }

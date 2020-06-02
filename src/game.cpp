@@ -391,60 +391,44 @@ void Game::render(void)
 		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
 
-	//set the clear color (the background color)
-	//glClearColor(0.52, 0.8, 0.92, 1.0);
-	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	//set the camera as default
 	camera->enable();
 
-	//set flags
-	glDisable(GL_BLEND);
 
-	////////////////////////////////////////////////////////////////////// pintar cielo
+	//Render World Sky
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	Matrix44 m2;
 	m2.setIdentity();
-
-	//enable shader
 	shader_blanc->enable();
-
-	//upload uniforms
 	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1) * 0.6);
 	shader_blanc->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_blanc->setUniform("u_texture", textures[7]);
 	shader_blanc->setUniform("u_model", m2);
-
 	meshes[7]->render(GL_TRIANGLES);
 	shader_blanc->disable();
 
-	//////////////////////////////////////////////////////////////////////
+	// Render World Floor
+	Matrix44 m;
+	Mesh* floor_mesh = new Mesh();
+	floor_mesh->createPlane(2 * max(my_world.h, my_world.w));
+	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
+	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane3.png");
+	renderMesh(m, floor_mesh, floor_tex);
 
-
-
-
-	
-
-
+	//Render Characters
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
-
-
-
-
 	//renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
 	herorun->assignTime(time);
 	renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
-	
-	
-
-
 	
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
@@ -453,33 +437,27 @@ void Game::render(void)
 	//Skeleton result; //no hacer en local
 	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
 	//result.renderSkeleton(camera, tenosuke.model);
+	/*
 
-	Matrix44 m;
 	m.scale(100, 0, 100);
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
+	*/
 
+
+
+	// Render Tile Map 3D
 	renderMap(my_world.map, my_world.w, my_world.h);
+
 
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
 	Stage::current_stage->render();
-
-
-
-	//swap between front buffer and back buffer
-	
-	
-	
-
 
 	//////////////////////////////////////////menu vida
 	float aux = (window_width / (float)window_height);
 	renderUI(2, textures[99], aux);
 	renderUI(0, textures[97],aux);
 
-	
-	
-	
 	///personaje en mini mapa
 
 	glDisable(GL_DEPTH_TEST);
@@ -488,7 +466,6 @@ void Game::render(void)
 
 	float x = -((player.pos.z /220)-1.34);//bastante bien
 	float y = (player.pos.x / (60 * -2.7))  +0.85 ;
-
 
 	quad.vertices.push_back(Vector3(-0.98f +x, (-0.96f + y) , 0));
 	quad.vertices.push_back(Vector3(-1 +x, (-1 + y), 0));
@@ -505,6 +482,7 @@ void Game::render(void)
 	///////////////////////////////////////////
 
 
+	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
 
 }
