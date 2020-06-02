@@ -196,13 +196,13 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[9] = Texture::Get("data/Assets/Textures/arbol_verde.png");
 
 
-
+	
 	meshes[10] = Mesh::Get("data/Assets/Meshes/tenosuke_character.mesh");
 	textures[10] = Texture::Get("data/Assets/Textures/tenosuke_piel.png");
 	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_dancing.skanim");
 
 
-	player.mesh = Mesh::Get("data/Assets/Meshes/hero.obj");
+	player.mesh = Mesh::Get("data/Assets/Meshes/heroe.mesh");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
 	herorun = Animation::Get("data/Assets/animaciones/heroe_fastrun.skanim");
@@ -213,6 +213,9 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	ghost.mesh  = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	ghost.texture = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 
+	textures[97] = Texture::Get("data/Assets/Textures/minimapa.png");
+	textures[98] = Texture::Get("data/Assets/Textures/vida_baja.png");
+	textures[99] = Texture::Get("data/Assets/Textures/vida.png");
 
 	
 	player.pos = Vector3(114.f, 0, -32.5f);
@@ -264,6 +267,70 @@ void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton
 
 
 }
+
+void renderUI(int cuadrante, Texture* tex, float relation) {
+	glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+	Mesh quad;
+
+	if (cuadrante == 0) {
+
+		//existia la funcion quad.createQuad(centro, ancho, alto (w/ float h), invertir evs)...
+		//o pasandole pixels y una camara asi:
+		/*
+		glDisable(GL_CULL_FACE)
+		Camera cam2D;
+		cam2D.setOrthographic(0,w_w,w_h,0,-1,1);
+		cam2D.enable();
+		shader->setUniform("u_model", matrix44());
+		shader->setUniform("u_viewprojection", cam2D.viewprojection_matrix);
+		
+		*/
+
+
+		/*quad.vertices.push_back(Vector3(-1, 1, 0));
+		quad.uvs.push_back(Vector2(0, 1));
+		quad.vertices.push_back(Vector3(-1, -1, 0));
+		quad.uvs.push_back(Vector2(0, 0));
+		quad.vertices.push_back(Vector3(1, 1, 0));
+		quad.uvs.push_back(Vector2(1, 1));
+
+		quad.vertices.push_back(Vector3(1, 1, 0));
+		quad.uvs.push_back(Vector2(1, 1));
+		quad.vertices.push_back(Vector3(-1, -1, 0));
+		quad.uvs.push_back(Vector2(0, 0));
+		quad.vertices.push_back(Vector3(1, -1, 0));
+		quad.uvs.push_back(Vector2(1, 0));
+		*/
+
+		quad.createQuad(0, 0, 2, 2 , false);
+	}
+	else if (cuadrante == 1) {
+		
+		quad.createQuad(0.5, 0.5, 1, 1, false);
+	}
+	else if (cuadrante == 2) {
+		
+		quad.createQuad(-0.5, 0.5, 1, 1, false);
+	}
+	else if (cuadrante == 3) {
+		
+		quad.createQuad(-0.5, -0.5, 1, 1, false);
+		
+	}
+	else if (cuadrante == 4) {
+		
+		quad.createQuad(0.5, -0.5, 1, 1, false);
+	}
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");//flat.fs");
+	shader->enable();
+	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_texture", tex);
+	//shader->setUniform("u_texture_tiling", 1.0f);
+	quad.render(GL_TRIANGLES);
+	shader->disable();
+}
+
 
 
 void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
@@ -318,7 +385,6 @@ void renderMap(int * map, int w, int h) {
 
 void Game::render(void)
 {
-	
 	if(!free_cam){
 
 		camera->eye = player.model * Vector3(0, 1.25, 1);   //0,1.3,0.5   //0.5 GUAY
@@ -355,23 +421,31 @@ void Game::render(void)
 
 	//////////////////////////////////////////////////////////////////////
 
+
+
+
 	
+
+
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
 
-	renderMesh(player.model, player.mesh, player.texture);
+
+
+
+	//renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
-	//herorun->assignTime(time);
-	//renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
+	herorun->assignTime(time);
+	renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
 	
 	
 
 
-
+	
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
 	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke.model);
@@ -390,7 +464,47 @@ void Game::render(void)
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
 	Stage::current_stage->render();
 
+
+
 	//swap between front buffer and back buffer
+	
+	
+	
+
+
+	//////////////////////////////////////////menu vida
+	float aux = (window_width / (float)window_height);
+	renderUI(2, textures[99], aux);
+	renderUI(0, textures[97],aux);
+
+	
+	
+	
+	///personaje en mini mapa
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	Mesh quad;
+
+	float x = -((player.pos.z /220)-1.34);//bastante bien
+	float y = (player.pos.x / (60 * -2.7))  +0.85 ;
+
+
+	quad.vertices.push_back(Vector3(-0.98f +x, (-0.96f + y) , 0));
+	quad.vertices.push_back(Vector3(-1 +x, (-1 + y), 0));
+	quad.vertices.push_back(Vector3(-0.96f +x , (-1 + y) , 0));
+
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/flat.fs");
+	shader->enable();
+	shader->setUniform("u_color", Vector4(0, 0,1, 1));
+	quad.render(GL_TRIANGLES);
+
+
+	///////////////////////////////////////// sangre vida
+	//renderUI(0, textures[98]);
+	///////////////////////////////////////////
+
+
 	SDL_GL_SwapWindow(this->window);
 
 }

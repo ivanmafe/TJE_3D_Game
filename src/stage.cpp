@@ -2,6 +2,8 @@
 #include "game.h"
 #include "camera.h"
 #include "input.h"
+#include "mesh.h"
+#include "shader.h"
 
 Stage::Stage(const char* name) {
 	stages[name] = this;
@@ -20,6 +22,10 @@ PlayStage::PlayStage() : Stage("PlayStage") {
 void PlayStage::render() {
 	
 	drawText(2,10,"[M] to open menu",Vector3(1,1,1),3);
+
+
+
+	
 };
 
 void PlayStage::update() {};
