@@ -40,6 +40,9 @@ Mesh * meshes[100];
 Texture * textures[100];
 Animation* tenosukedance;
 Animation* herorun;
+Animation* heroidle;
+Skeleton* heroblend;
+bool moving;
 
 
 //World and Execution
@@ -206,6 +209,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
 	herorun = Animation::Get("data/Assets/animaciones/heroe_fastrun.skanim");
+	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
+	heroblend = new Skeleton();
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
@@ -440,8 +445,16 @@ void Game::render(void)
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
 	herorun->assignTime(time);
-	renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
-	
+	heroidle->assignTime(time);
+
+	if (moving){
+		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, 1, heroblend);
+	}
+	else{
+		blendSkeleton(&herorun->skeleton, &heroidle->skeleton, 1, heroblend);
+	}
+	renderAnimated(player.model, player.mesh, player.texture, heroblend);
+
 	
 
 
@@ -559,14 +572,18 @@ void Game::update(double seconds_elapsed)
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			targetpos = player.pos + front * player.speed * seconds_elapsed;
-		}
-		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			moving = true;
+		}else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
 			targetpos = player.pos - front * player.speed * seconds_elapsed;
+			moving = true;
 		}
+		else {
+			moving = false;
+		}
+
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
 			player.angle -= 90 * seconds_elapsed;
-		}
-		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+		}if (Input::isKeyPressed(SDL_SCANCODE_D)) {
 			player.angle += 90 * seconds_elapsed;
 		}
 
