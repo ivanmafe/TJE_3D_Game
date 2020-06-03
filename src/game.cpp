@@ -466,11 +466,14 @@ void Game::render(void)
 	//Skeleton result; //no hacer en local
 	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
 	//result.renderSkeleton(camera, tenosuke.model);
-
+	
+	// Render World Floor
 	Matrix44 m;
-	m.scale(100, 0, 100);
-	m.translate(0, -0.9f, 0);
-	renderMesh(m, meshes[0], textures[0]);
+	Mesh* floor_mesh = new Mesh();
+	floor_mesh->createPlane(2 * max(my_world.h, my_world.w));
+	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
+	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
+	renderMesh(m, floor_mesh, floor_tex);
 
 	renderMap(my_world.map, my_world.w, my_world.h);
 
