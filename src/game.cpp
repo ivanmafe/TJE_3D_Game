@@ -40,6 +40,9 @@ Mesh * meshes[100];
 Texture * textures[100];
 Animation* tenosukedance;
 Animation* herorun;
+Animation* heroidle;
+Skeleton* heroblend;
+bool moving;
 
 
 //World and Execution
@@ -206,6 +209,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
 	herorun = Animation::Get("data/Assets/animaciones/heroe_fastrun.skanim");
+	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
+	heroblend = new Skeleton();
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
 	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
@@ -391,44 +396,68 @@ void Game::render(void)
 		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
 
+	//set the clear color (the background color)
+	//glClearColor(0.52, 0.8, 0.92, 1.0);
+	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	//set the camera as default
 	camera->enable();
 
-
-	//Render World Sky
-	glDisable(GL_DEPTH_TEST);
+	//set flags
 	glDisable(GL_BLEND);
+
+	////////////////////////////////////////////////////////////////////// pintar cielo
+	glDisable(GL_DEPTH_TEST);
 	Matrix44 m2;
 	m2.setIdentity();
+
+	//enable shader
 	shader_blanc->enable();
+
+	//upload uniforms
 	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1) * 0.6);
 	shader_blanc->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_blanc->setUniform("u_texture", textures[7]);
 	shader_blanc->setUniform("u_model", m2);
+
 	meshes[7]->render(GL_TRIANGLES);
 	shader_blanc->disable();
 
-	// Render World Floor
-	Matrix44 m;
-	Mesh* floor_mesh = new Mesh();
-	floor_mesh->createPlane(2 * max(my_world.h, my_world.w));
-	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
-	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane3.png");
-	renderMesh(m, floor_mesh, floor_tex);
+	//////////////////////////////////////////////////////////////////////
 
-	//Render Characters
+
+
+
+	
+
+
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
+
+
+
+
 	//renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
 	herorun->assignTime(time);
-	renderAnimated(player.model, player.mesh, player.texture, &herorun->skeleton);
+	heroidle->assignTime(time);
+
+	if (moving){
+		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, 1, heroblend);
+	}
+	else{
+		blendSkeleton(&herorun->skeleton, &heroidle->skeleton, 1, heroblend);
+	}
+	renderAnimated(player.model, player.mesh, player.texture, heroblend);
+
+	
+
+
 	
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
@@ -437,27 +466,33 @@ void Game::render(void)
 	//Skeleton result; //no hacer en local
 	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
 	//result.renderSkeleton(camera, tenosuke.model);
-	/*
 
+	Matrix44 m;
 	m.scale(100, 0, 100);
 	m.translate(0, -0.9f, 0);
 	renderMesh(m, meshes[0], textures[0]);
-	*/
 
-
-
-	// Render Tile Map 3D
 	renderMap(my_world.map, my_world.w, my_world.h);
-
 
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
 	Stage::current_stage->render();
+
+
+
+	//swap between front buffer and back buffer
+	
+	
+	
+
 
 	//////////////////////////////////////////menu vida
 	float aux = (window_width / (float)window_height);
 	renderUI(2, textures[99], aux);
 	renderUI(0, textures[97],aux);
 
+	
+	
+	
 	///personaje en mini mapa
 
 	glDisable(GL_DEPTH_TEST);
@@ -466,6 +501,7 @@ void Game::render(void)
 
 	float x = -((player.pos.z /220)-1.34);//bastante bien
 	float y = (player.pos.x / (60 * -2.7))  +0.85 ;
+
 
 	quad.vertices.push_back(Vector3(-0.98f +x, (-0.96f + y) , 0));
 	quad.vertices.push_back(Vector3(-1 +x, (-1 + y), 0));
@@ -482,7 +518,6 @@ void Game::render(void)
 	///////////////////////////////////////////
 
 
-	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
 
 }
@@ -537,14 +572,18 @@ void Game::update(double seconds_elapsed)
 
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			targetpos = player.pos + front * player.speed * seconds_elapsed;
-		}
-		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			moving = true;
+		}else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
 			targetpos = player.pos - front * player.speed * seconds_elapsed;
+			moving = true;
 		}
+		else {
+			moving = false;
+		}
+
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
 			player.angle -= 90 * seconds_elapsed;
-		}
-		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+		}if (Input::isKeyPressed(SDL_SCANCODE_D)) {
 			player.angle += 90 * seconds_elapsed;
 		}
 
