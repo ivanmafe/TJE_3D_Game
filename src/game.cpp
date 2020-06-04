@@ -101,17 +101,19 @@ void generateMap(int * map, int w, int h) {
 			
 		}
 
-
-	for (int x = 0; x < 128; x++) 
-		for (int z = 0; z < 128; z++) {
-			if ((rand() % 100) < 98) {
+	int aux_h = h * 4;
+	int aux_w = w * 4;
+	for (int x = 0; x < aux_h; x++)
+		for (int z = 0; z < aux_w; z++) {
+			if ((rand() % 100) < 94) {
 				continue;
 			}
 			if (my_world.isCellEmpty(x, z)) {
 				Entity ent;
-				ent.model.setTranslation(x, 0, -z);
+
 				//float s = 10 + random() * 4.0;
-				ent.model.rotate(random() * PI, Vector3(0, 1, 0));
+				ent.model.rotate(random() * DEG2RAD, Vector3(0, 1, 0));
+				ent.model.setTranslation(x, 0, -z);
 				ent.model.scale(1.5, 1.5, 1.5);
 				models[9].push_back(ent.model);
 				ent.mesh = meshes[9];
@@ -122,8 +124,8 @@ void generateMap(int * map, int w, int h) {
 		}
 
 
-	for (int x = 0; x < 128; x++)
-		for (int z = 0; z < 128; z++) {
+	for (int x = 0; x < aux_h; x++)
+		for (int z = 0; z < aux_w; z++) {
 			if ((rand() % 100) < 90) {
 				continue;
 			}
@@ -166,44 +168,55 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	shader_blanc = Shader::Get("data/shaders/basic.vs", "data/shaders/sky.fs");
 
 	//SUELO
-	meshes[0] = Mesh::Get("data/Assets/Meshes/ground.obj");
-	textures[0] = Texture::Get("data/Assets/Textures/ground.png");
+	meshes[0] = Mesh::Get("data/Assets/Meshes/vacio.obj");
+	textures[0] = Texture::Get("data/Assets/Textures/vacio.png");
 	//ESQUINA
 	meshes[1] = Mesh::Get("data/Assets/Meshes/esquina_exterior_1.obj");
 	textures[1] = Texture::Get("data/Assets/Textures/esquina_exterior_1.png");
+	meshes[12] = Mesh::Get("data/Assets/Meshes/esquina_exterior_2.obj");
+	textures[12] = Texture::Get("data/Assets/Textures/esquina_exterior_2.png");
+	meshes[17] = Mesh::Get("data/Assets/Meshes/esquina_pasillo_1.obj");
+	textures[17] = Texture::Get("data/Assets/Textures/esquina_pasillo_1.png");
 	//ESQUINA INTERNA
 	meshes[2] = Mesh::Get("data/Assets/Meshes/esquina_interna_x1.obj");
 	textures[2] = Texture::Get("data/Assets/Textures/esquina_interna_x1.png");
+	meshes[13] = Mesh::Get("data/Assets/Meshes/esquina_interna_x2.obj");
+	textures[13] = Texture::Get("data/Assets/Textures/esquina_interna_x2.png");
 	//PARED
 	meshes[3] = Mesh::Get("data/Assets/Meshes/pared1_x1.obj");
 	textures[3] = Texture::Get("data/Assets/Textures/pared1_x1.png");
+	meshes[14] = Mesh::Get("data/Assets/Meshes/pared2_x1.obj");
+	textures[14] = Texture::Get("data/Assets/Textures/pared2_x1.png");
+	meshes[15] = Mesh::Get("data/Assets/Meshes/pared1_x2.obj");
+	textures[15] = Texture::Get("data/Assets/Textures/pared1_x2.png");
+	meshes[16] = Mesh::Get("data/Assets/Meshes/pared2_x2.obj");
+	textures[16] = Texture::Get("data/Assets/Textures/pared2_x2.png");
 	//OTROS
 	meshes[4] = Mesh::Get("data/Assets/Meshes/cartel_misiones.obj");
 	textures[4] = Texture::Get("data/Assets/Textures/cartel_misiones.png");
-	meshes[5] = Mesh::Get("data/Assets/Meshes/vacio.obj");
-	textures[5] = Texture::Get("data/Assets/Textures/vacio.png");
+	meshes[5] = Mesh::Get("data/Assets/Meshes/charco.obj");
+	textures[5] = Texture::Get("data/Assets/Textures/charco.png");
 	meshes[6] = Mesh::Get("data/Assets/Meshes/casa1.obj");
 	textures[6] = Texture::Get("data/Assets/Textures/casa1.png");
+	meshes[11] = Mesh::Get("data/Assets/Meshes/casa2.obj");
+	textures[11] = Texture::Get("data/Assets/Textures/casa2.png");
+	meshes[18] = Mesh::Get("data/Assets/Meshes/tienda.obj");
+	textures[18] = Texture::Get("data/Assets/Textures/tienda.png");
+
 
 
 	meshes[7] = Mesh::Get("data/Assets/Meshes/cielo.ase");
 	textures[7] = Texture::Get("data/Assets/Textures/Dani_sky2.tga");
-
-
-
-
 	meshes[8] = Mesh::Get("data/Assets/Meshes/hierba.obj");
 	textures[8] = Texture::Get("data/Assets/Textures/hierba.png");
-
 	meshes[9] = Mesh::Get("data/Assets/Meshes/arbol verde.obj");
 	textures[9] = Texture::Get("data/Assets/Textures/arbol_verde.png");
 
 
-	
+	// CHARACTERS
 	meshes[10] = Mesh::Get("data/Assets/Meshes/tenosuke_character.mesh");
 	textures[10] = Texture::Get("data/Assets/Textures/tenosuke_piel.png");
-	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_dancing.skanim");
-
+	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
 
 	player.mesh = Mesh::Get("data/Assets/Meshes/heroe.mesh");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
@@ -218,24 +231,29 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	ghost.mesh  = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	ghost.texture = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 
+	// GUI
 	textures[97] = Texture::Get("data/Assets/Textures/minimapa.png");
 	textures[98] = Texture::Get("data/Assets/Textures/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/vida.png");
 
 	
-	player.pos = Vector3(114.f, 0, -32.5f);
-	player.setModelPos(Vector3(114.f, 0, -32.5f));
+	//player.pos = Vector3(114.f, 0, -32.5f);
+	//player.setModelPos(Vector3(114.f, 0, -32.5f));
+	
+	player.pos = Vector3(10.4f, 0, -10.8f);
+	player.setModelPos(Vector3(10.4f, 0, -10.8f));
 
 	ghost.pos = Vector3(109.f, 0, -36.f);
 	ghost.setModelPos(Vector3(109.f, 0, -36.f));
 	ghost.model.rotate(-60 * DEG2RAD, Vector3(0, 1, 0));
 	ghost.model.scale(0.75, 0.75, 0.75);
 
-	tenosuke.pos = Vector3(80.f, 0, -36.f);
-	tenosuke.setModelPos(Vector3(80.f, 0, -36.f));
+	tenosuke.pos = Vector3(17.2f, 0, -28.9f);
+	tenosuke.setModelPos(Vector3(17.2f, 0, -28.9f));
 	tenosuke.model.scale(0.25, 0.25, 0.25);
+	tenosuke.model.rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
 
-	my_world.loadMap("data/Assets/Big_map.csv");
+	my_world.loadMap("data/Assets/pueblo.csv");
 	generateMap(my_world.map, my_world.w, my_world.h);
 
 	//hide the cursor
