@@ -470,24 +470,23 @@ void Game::render(void)
 	renderMesh(dog.model, dog.mesh, dog.texture);
 	renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
-	herorun->assignTime(time);
 	heroidle->assignTime(time);
-	heroattack->assignTime(time);
+	float run_time = fmod(time, herorun->duration);
+	herorun->assignTime(run_time);
 
 	if (attack) {
-		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, 1, heroblend);
+		if (atk_time == 0.f) heroattack->assignTime(0);
+		atk_time += Game::instance->elapsed_time;
+		heroattack->assignTime(atk_time);
+		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, sin(atk_time * (PI/ heroattack->duration)), heroblend);
 		renderAnimated(player.model, player.mesh, player.texture, heroblend);
-		if (time - atk_time >= 1.467) {
-			attack = false;
-			heroattack->assignTime(0);
-		}
+		if (atk_time >= heroattack->duration) { attack = false; atk_time = 0;}
 	}
 	else {
 		float frac = player.speed / player.max_speed;
 		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, max(0, frac), heroblend);
 		renderAnimated(player.model, player.mesh, player.texture, heroblend);
 	}
-	//45
 
 
 
@@ -536,7 +535,7 @@ void Game::render(void)
 	float aux = (window_width / (float)window_height);
 	renderUI(2, textures[99], aux);
 	renderUI(4, textures[97], aux);
-	renderUI(0, textures[98], aux);
+	//renderUI(0, textures[98], aux);
 
 	
 	
@@ -577,7 +576,7 @@ void Game::update(double seconds_elapsed)
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		attack = true;
-		atk_time = time;
+		player.speed = 0.f;
 	}
 
 
@@ -593,7 +592,7 @@ void Game::update(double seconds_elapsed)
 		inMenu = !inMenu;
 	}
 
-	if (!free_cam && !inMenu) {
+	if (!free_cam && !inMenu && !attack) {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
