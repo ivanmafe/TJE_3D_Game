@@ -239,10 +239,9 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	ghost.mesh  = Mesh::Get("data/Assets/Meshes/Ghost.obj");
 	ghost.texture = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
 
-	// GUI
-	textures[97] = Texture::Get("data/Assets/Textures/minimapa.png");
-	textures[98] = Texture::Get("data/Assets/Textures/vida_baja.png");
-	textures[99] = Texture::Get("data/Assets/Textures/vida.png");
+	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimapa.png");
+	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
+	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
 	
 	//player.pos = Vector3(114.f, 0, -32.5f);
@@ -355,7 +354,7 @@ void renderUI(int cuadrante, Texture* tex, float relation) {
 	}
 	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");//flat.fs");
 	shader->enable();
-	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_color", Vector4(1,1,1,1);
 	shader->setUniform("u_texture", tex);
 	//shader->setUniform("u_texture_tiling", 1.0f);
 	quad.render(GL_TRIANGLES);
@@ -536,7 +535,8 @@ void Game::render(void)
 	//////////////////////////////////////////menu vida
 	float aux = (window_width / (float)window_height);
 	renderUI(2, textures[99], aux);
-	renderUI(0, textures[97],aux);
+	renderUI(4, textures[97], aux);
+	renderUI(0, textures[98], aux);
 
 	
 	
