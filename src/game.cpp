@@ -354,7 +354,7 @@ void renderUI(int cuadrante, Texture* tex, float relation) {
 	}
 	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");//flat.fs");
 	shader->enable();
-	shader->setUniform("u_color", Vector4(1,1,1,1);
+	shader->setUniform("u_color", Vector4(1,1,1,1));
 	shader->setUniform("u_texture", tex);
 	//shader->setUniform("u_texture_tiling", 1.0f);
 	quad.render(GL_TRIANGLES);
