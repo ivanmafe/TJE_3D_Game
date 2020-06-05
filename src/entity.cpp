@@ -4,6 +4,7 @@
 
 
 Entity::Entity() { 
+	
 	//empty constructor (if needed)
 }
 
@@ -27,6 +28,7 @@ void Entity::changeView(float v) {
 }
 
 void Entity::setModelPos(Vector3 p) {
+
 	model.m[12] = p.x;
 	model.m[13] = p.y;
 	model.m[14] = p.z;
@@ -34,4 +36,10 @@ void Entity::setModelPos(Vector3 p) {
 
 Player::Player() {
 
+}
+
+Enemy::Enemy(int enemy_type = 0) {
+
+	loot = static_cast<Item>(rand() % item_names.size());
+	type = static_cast <EnemyType>(enemy_type);
 }

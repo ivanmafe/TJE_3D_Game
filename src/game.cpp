@@ -23,10 +23,11 @@ Shader* anishader = NULL;
 Animation* anim = NULL;
 float angle = 0;
 bool free_cam = false;
-bool isMenu = false;
+bool inMenu = false;
 
 //Active Entities
-Entity player;
+Player player;
+Entity espada;
 Entity dog;
 Entity ghost;
 Entity tenosuke;
@@ -41,8 +42,8 @@ Texture * textures[100];
 Animation* tenosukedance;
 Animation* herorun;
 Animation* heroidle;
+Animation* heroattack;
 Skeleton* heroblend;
-bool moving;
 
 
 //World and Execution
@@ -144,8 +145,6 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	instance = this;
 	must_exit = false;
 
-	player.speed = 5;
-
 	fps = 0;
 	frame = 0;
 	time = 0.0f;
@@ -166,6 +165,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 	shader_instanced = Shader::Get("data/shaders/instanced.vs", "data/shaders/texture.fs");
 	shader_blanc = Shader::Get("data/shaders/basic.vs", "data/shaders/sky.fs");
+
+	std::string meshes_names[100];
+	//for(int x = 0 ; x < )
+
 
 	//SUELO
 	meshes[0] = Mesh::Get("data/Assets/Meshes/vacio.obj");
@@ -221,8 +224,13 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	player.mesh = Mesh::Get("data/Assets/Meshes/heroe.mesh");
 	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
 
-	herorun = Animation::Get("data/Assets/animaciones/heroe_fastrun.skanim");
+	espada.mesh = Mesh::Get("data/Assets/Meshes/espada1.obj");
+	espada.texture = Texture::Get("data/Assets/Textures/espada1.png");
+
+
+	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
 	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
+	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
 	heroblend = new Skeleton();
 
 	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
@@ -405,7 +413,8 @@ void renderMap(int * map, int w, int h) {
 }
 
 //what to do when the image has to be draw
-
+bool attack = false;
+float atk_time = 0.f;
 void Game::render(void)
 {
 	if(!free_cam){
@@ -464,16 +473,34 @@ void Game::render(void)
 
 	herorun->assignTime(time);
 	heroidle->assignTime(time);
+	heroattack->assignTime(time);
 
-	if (moving){
-		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, 1, heroblend);
+	if (attack) {
+		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, 1, heroblend);
+		renderAnimated(player.model, player.mesh, player.texture, heroblend);
+		if (time - atk_time >= 1.467) {
+			attack = false;
+			heroattack->assignTime(0);
+		}
 	}
-	else{
-		blendSkeleton(&herorun->skeleton, &heroidle->skeleton, 1, heroblend);
+	else {
+		float frac = player.speed / player.max_speed;
+		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, max(0, frac), heroblend);
+		renderAnimated(player.model, player.mesh, player.texture, heroblend);
 	}
-	renderAnimated(player.model, player.mesh, player.texture, heroblend);
+	//45
 
-	
+
+
+	heroblend->updateGlobalMatrices();
+	//mixamorig_RightHandIndex2
+	Matrix44 hand = heroblend->getBoneMatrix("mixamorig_RightHandIndex2", false);
+	hand = hand * player.model;
+	hand.scale(0.25, 0.25, 0.25);
+	hand.translate(0.1, 0, 0.1);
+	hand.rotate(80 * DEG2RAD, Vector3(1, 0, 0));
+	hand.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
+	renderMesh(hand, espada.mesh, espada.texture);
 
 
 	
@@ -548,34 +575,25 @@ void Game::update(double seconds_elapsed)
 {
 
 
+	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+		attack = true;
+		atk_time = time;
+	}
+
+
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) {
-		if (free_cam) {
-			Stage::current_stage->changeStage("MenuStage");
-			free_cam = false;
-		}
-		else {
-			Stage::current_stage->changeStage("DebugStage");
-			isMenu = false;
-			free_cam = true;
-		}
+		if (free_cam) { Stage::current_stage->changeStage("MenuStage"); inMenu = true; }
+		else { Stage::current_stage->changeStage("DebugStage");  inMenu = false; }
+		free_cam = !free_cam;
 	}
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_M)) {
-		if (free_cam) {
-			Stage::current_stage->changeStage("MenuStage");
-			free_cam = false;
-		}
-		else if (!isMenu) {
-			Stage::current_stage->changeStage("MenuStage");
-			isMenu = true;
-		}
-		else {
-			Stage::current_stage->changeStage("PlayStage");
-			isMenu = false;
-		}
+		if (inMenu)  Stage::current_stage->changeStage("PlayStage"); 
+		else Stage::current_stage->changeStage("MenuStage");
+		inMenu = !inMenu;
 	}
 
-	if (!free_cam && !isMenu) {
+	if (!free_cam && !inMenu) {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -590,17 +608,26 @@ void Game::update(double seconds_elapsed)
 
 		Stage::current_stage->update();
 
-
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
-			targetpos = player.pos + front * player.speed * seconds_elapsed;
-			moving = true;
-		}else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			player.momentum = 1;
+			if (player.speed < player.max_speed) player.speed += 0.07f;
+			targetpos = player.pos + front * player.speed * seconds_elapsed;		
+		}
+		else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			player.momentum = -1;
+			if (player.speed < player.max_speed) player.speed += 0.07f;
 			targetpos = player.pos - front * player.speed * seconds_elapsed;
-			moving = true;
 		}
 		else {
-			moving = false;
+			if (player.speed > 0.f) {
+				targetpos = player.pos + (front * player.momentum) * player.speed * seconds_elapsed;
+				player.speed -= 0.05;
+			} 
 		}
+		
+
+
+
 
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
 			player.angle -= 90 * seconds_elapsed;
@@ -670,6 +697,7 @@ void Game::update(double seconds_elapsed)
 		//GET PLAYER POS
 		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
 			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
+			std::cout << player.speed << '\n';
 		}
 	}
 	else Stage::current_stage->update();

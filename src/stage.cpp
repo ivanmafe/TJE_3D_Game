@@ -26,7 +26,12 @@ void PlayStage::render() {
 	
 };
 
-void PlayStage::update() {};
+void PlayStage::update() {
+
+
+
+
+};
 
 
 ////////////////// MenuStage //////////////////////
