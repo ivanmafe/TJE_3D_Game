@@ -2,10 +2,32 @@
 #include "utils.h"
 
 
+Entity::Entity() {
 
-Entity::Entity() { 
+}
+
+Entity::Entity(Vector3 p, int r, float s) {
+	pos = p;
+	setModelPos(p);
+	if(r != 0) model.rotate(r * DEG2RAD, Vector3(0, 1, 0));
+	if(s != 0.f) model.scale(s, s, s);
+}
+
+
+Entity::Entity(const char* m, const char* t) {
 	
-	//empty constructor (if needed)
+	mesh = Mesh::Get(m);
+	texture = Texture::Get(t);
+}
+
+Entity::Entity(const char* m, const char* t, Vector3 p, int r, float s) {
+
+	pos = p;
+	setModelPos(p);
+	if (r != 0) model.rotate(r * DEG2RAD, Vector3(0, 1, 0));
+	if (s != 0.f) model.scale(s, s, s);
+	mesh = Mesh::Get(m);
+	texture = Texture::Get(t);
 }
 
 void Entity::movePos(Vector3 p) {
@@ -34,11 +56,12 @@ void Entity::setModelPos(Vector3 p) {
 	model.m[14] = p.z;
 }
 
-Player::Player() {
 
-}
 
-Enemy::Enemy(int enemy_type = 0) {
+
+
+
+Enemy::Enemy(const char* m, const char* t, int enemy_type = 0):Entity(m,t) {
 
 	loot = static_cast<Item>(rand() % item_names.size());
 	type = static_cast <EnemyType>(enemy_type);

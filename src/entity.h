@@ -30,21 +30,13 @@ public:
 	float light_atk = 30.f;
 	float heavy_atk = 55.f;
 
-
 	Entity();
+	Entity(Vector3 p, int r , float s);
+	Entity(const char* m, const char* t);
+	Entity(const char* m, const char* t, Vector3 p, int r, float s);
 	void movePos(Vector3 p);
 	void changeView(float v);
 	void setModelPos(Vector3 p);
-};
-
-class Player : public Entity {
-public:
-
-	float speed = 0.f;
-	float max_speed = 5;
-	std::vector<Item> inventory[10];
-
-	Player();
 };
 
 class Enemy : public Entity {
@@ -53,7 +45,7 @@ class Enemy : public Entity {
 	EnemyType type;
 	float range = 7.5f;
 
-	Enemy(int enemy_type);
+	Enemy(const char* m, const char* t, int enemy_type);
 };
 
 #endif

@@ -6,10 +6,15 @@
 #include "shader.h"
 #include "input.h"
 #include "animation.h"
+#include <string>
+#include <cstring>
 
 #include "entity.h"
+#include "entity_player.h"
 #include "world.h"
 #include "stage.h"
+#include "data.h"
+
 
 #include <cmath>
 
@@ -160,106 +165,39 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	camera->lookAt(Vector3(0.2f,0.6f,-0.5f),Vector3(0.2f,0.f,1.f), Vector3(0.f,1.f,0.f)); //position the camera and point to 0,0,0
 	camera->setPerspective(70.f,window_width/(float)window_height,0.1f,100000.f); //set the projection, we want to be perspective
 
-
-	// example of shader loading using the shaders manager
+	// Load Shaders
 	shader = Shader::Get("data/shaders/basic.vs", "data/shaders/texture.fs");
 	shader_instanced = Shader::Get("data/shaders/instanced.vs", "data/shaders/texture.fs");
 	shader_blanc = Shader::Get("data/shaders/basic.vs", "data/shaders/sky.fs");
 
-	std::string meshes_names[100];
-	//for(int x = 0 ; x < )
-
-
-	//SUELO
-	meshes[0] = Mesh::Get("data/Assets/Meshes/vacio.obj");
-	textures[0] = Texture::Get("data/Assets/Textures/vacio.png");
-	//ESQUINA
-	meshes[1] = Mesh::Get("data/Assets/Meshes/esquina_exterior_1.obj");
-	textures[1] = Texture::Get("data/Assets/Textures/esquina_exterior_1.png");
-	meshes[12] = Mesh::Get("data/Assets/Meshes/esquina_exterior_2.obj");
-	textures[12] = Texture::Get("data/Assets/Textures/esquina_exterior_2.png");
-	meshes[17] = Mesh::Get("data/Assets/Meshes/esquina_pasillo_1.obj");
-	textures[17] = Texture::Get("data/Assets/Textures/esquina_pasillo_1.png");
-	//ESQUINA INTERNA
-	meshes[2] = Mesh::Get("data/Assets/Meshes/esquina_interna_x1.obj");
-	textures[2] = Texture::Get("data/Assets/Textures/esquina_interna_x1.png");
-	meshes[13] = Mesh::Get("data/Assets/Meshes/esquina_interna_x2.obj");
-	textures[13] = Texture::Get("data/Assets/Textures/esquina_interna_x2.png");
-	//PARED
-	meshes[3] = Mesh::Get("data/Assets/Meshes/pared1_x1.obj");
-	textures[3] = Texture::Get("data/Assets/Textures/pared1_x1.png");
-	meshes[14] = Mesh::Get("data/Assets/Meshes/pared2_x1.obj");
-	textures[14] = Texture::Get("data/Assets/Textures/pared2_x1.png");
-	meshes[15] = Mesh::Get("data/Assets/Meshes/pared1_x2.obj");
-	textures[15] = Texture::Get("data/Assets/Textures/pared1_x2.png");
-	meshes[16] = Mesh::Get("data/Assets/Meshes/pared2_x2.obj");
-	textures[16] = Texture::Get("data/Assets/Textures/pared2_x2.png");
-	//OTROS
-	meshes[4] = Mesh::Get("data/Assets/Meshes/cartel_misiones.obj");
-	textures[4] = Texture::Get("data/Assets/Textures/cartel_misiones.png");
-	meshes[5] = Mesh::Get("data/Assets/Meshes/charco.obj");
-	textures[5] = Texture::Get("data/Assets/Textures/charco.png");
-	meshes[6] = Mesh::Get("data/Assets/Meshes/casa1.obj");
-	textures[6] = Texture::Get("data/Assets/Textures/casa1.png");
-	meshes[11] = Mesh::Get("data/Assets/Meshes/casa2.obj");
-	textures[11] = Texture::Get("data/Assets/Textures/casa2.png");
-	meshes[18] = Mesh::Get("data/Assets/Meshes/tienda.obj");
-	textures[18] = Texture::Get("data/Assets/Textures/tienda.png");
-
-
-
-	meshes[7] = Mesh::Get("data/Assets/Meshes/cielo.ase");
-	textures[7] = Texture::Get("data/Assets/Textures/Dani_sky2.tga");
-	meshes[8] = Mesh::Get("data/Assets/Meshes/hierba.obj");
-	textures[8] = Texture::Get("data/Assets/Textures/hierba.png");
-	meshes[9] = Mesh::Get("data/Assets/Meshes/arbol verde.obj");
-	textures[9] = Texture::Get("data/Assets/Textures/arbol_verde.png");
-
-
-	// CHARACTERS
-	meshes[10] = Mesh::Get("data/Assets/Meshes/tenosuke_character.mesh");
-	textures[10] = Texture::Get("data/Assets/Textures/tenosuke_piel.png");
-	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
-
-	player.mesh = Mesh::Get("data/Assets/Meshes/heroe.mesh");
-	player.texture = Texture::Get("data/Assets/Textures/hero.tga");
-
-	espada.mesh = Mesh::Get("data/Assets/Meshes/espada1.obj");
-	espada.texture = Texture::Get("data/Assets/Textures/espada1.png");
-
-
-	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
-	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
-	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
-	heroblend = new Skeleton();
-
-	dog.mesh = Mesh::Get("data/Assets/Meshes/Dog.obj");
-	dog.texture = Texture::Get("data/Assets/Textures/Dog.tga");
-
-	ghost.mesh  = Mesh::Get("data/Assets/Meshes/Ghost.obj");
-	ghost.texture = Texture::Get("data/Assets/Textures/Ghost_Violet.tga");
-
+	// Load Meshes and Textures
+	for (int i = 0; i < data_h_size + 1; ++i) {
+		std::string s1 = "data/Assets/Meshes/" + mesh_names[i];
+		std::string s2 = "data/Assets/Textures/" + texture_names[i];
+		meshes[i] = Mesh::Get(const_cast<char*>(s1.c_str()));
+		textures[i] = Texture::Get(const_cast<char*>(s2.c_str()));
+	}
 	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimapa.png");
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
+
+	// Load Animations
+	heroblend = new Skeleton();
+	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
+	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
+	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
+	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
 	
-	//player.pos = Vector3(114.f, 0, -32.5f);
-	//player.setModelPos(Vector3(114.f, 0, -32.5f));
+	// Load Entities
+	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(10.4f, 0, -10.8f));
+	espada = *new Entity("data/Assets/Meshes/espada1.obj", "data/Assets/Textures/espada1.png");
+	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
+	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
+	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(109.f, 0, -36.f), -60, 0.75);
 	
-	player.pos = Vector3(10.4f, 0, -10.8f);
-	player.setModelPos(Vector3(10.4f, 0, -10.8f));
 
-	ghost.pos = Vector3(109.f, 0, -36.f);
-	ghost.setModelPos(Vector3(109.f, 0, -36.f));
-	ghost.model.rotate(-60 * DEG2RAD, Vector3(0, 1, 0));
-	ghost.model.scale(0.75, 0.75, 0.75);
-
-	tenosuke.pos = Vector3(17.2f, 0, -28.9f);
-	tenosuke.setModelPos(Vector3(17.2f, 0, -28.9f));
-	tenosuke.model.scale(0.25, 0.25, 0.25);
-	tenosuke.model.rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
-
+	// Load Map
 	my_world.loadMap("data/Assets/pueblo.csv");
 	generateMap(my_world.map, my_world.w, my_world.h);
 
@@ -422,16 +360,11 @@ void Game::render(void)
 		camera->center = player.model * Vector3(0, 0.7, -0.5);
 	}
 
-	//set the clear color (the background color)
-	//glClearColor(0.52, 0.8, 0.92, 1.0);
-	// Clear the window and the depth buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//set the camera as default
 	camera->enable();
 
-	//set flags
-	glDisable(GL_BLEND);
 
 	////////////////////////////////////////////////////////////////////// pintar cielo
 	glDisable(GL_DEPTH_TEST);
@@ -452,13 +385,8 @@ void Game::render(void)
 
 	//////////////////////////////////////////////////////////////////////
 
-
-
-
-	
-
-
-
+	//set flags
+	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
@@ -488,7 +416,7 @@ void Game::render(void)
 		renderAnimated(player.model, player.mesh, player.texture, heroblend);
 	}
 
-
+	
 
 	heroblend->updateGlobalMatrices();
 	//mixamorig_RightHandIndex2
@@ -500,11 +428,10 @@ void Game::render(void)
 	hand.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
 	renderMesh(hand, espada.mesh, espada.texture);
 
-
 	
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
-	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke.model);
+	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke->model);
 
 	//Skeleton result; //no hacer en local
 	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
@@ -573,7 +500,6 @@ void Game::render(void)
 void Game::update(double seconds_elapsed)
 {
 
-
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		attack = true;
 		player.speed = 0.f;
@@ -596,7 +522,7 @@ void Game::update(double seconds_elapsed)
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		Vector3 targetpos = player.pos; 
+		Vector3 targetpos = player.pos;
 		Matrix44 R;
 		R.setRotation(player.angle * DEG2RAD, Vector3(0, 1, 0));
 		Vector3 front = R.rotateVector(Vector3(0, 0, -1));
@@ -610,7 +536,7 @@ void Game::update(double seconds_elapsed)
 		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
 			player.momentum = 1;
 			if (player.speed < player.max_speed) player.speed += 0.07f;
-			targetpos = player.pos + front * player.speed * seconds_elapsed;		
+			targetpos = player.pos + front * player.speed * seconds_elapsed;
 		}
 		else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
 			player.momentum = -1;
@@ -639,7 +565,6 @@ void Game::update(double seconds_elapsed)
 		//COLISIONES	
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-
 		//calculamos el centro de la esfera de colisión del player elevandola hasta la cintura
 		Vector3 character_center = targetpos + Vector3(0, 0.3, 0);
 
@@ -649,7 +574,7 @@ void Game::update(double seconds_elapsed)
 		
 		std::vector<Entity> collidable = getNearEntities(player.pos.x, -player.pos.z);
 		collidable.insert(collidable.end(), trees.begin(), trees.end());
-		collidable.push_back(ghost);
+		//collidable.push_back(ghost);
 		int size = collidable.size();
 
 		for (int i = 0; i < size; i++) {
