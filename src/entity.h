@@ -23,7 +23,7 @@ public:
 	Vector3 pos;
 	float angle = 0.f;
 	int momentum = 0;
-
+	bool wasHit = false;
 	//playable characteristics
 	float life = 100.f;
 	float max_life = 100.f;
@@ -44,8 +44,9 @@ class Enemy : public Entity {
 	Item loot;
 	EnemyType type;
 	float range = 7.5f;
-
-	Enemy(const char* m, const char* t, int enemy_type);
+	bool wasHit = false;
+	Enemy();
 };
+
 
 #endif

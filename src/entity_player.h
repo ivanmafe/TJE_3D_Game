@@ -2,6 +2,7 @@
 #define ENTITY_PLAYER_H
 
 #include "entity.h"
+#include "utils.h"
 
 class Player : public Entity {
 public:

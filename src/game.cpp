@@ -34,8 +34,8 @@ bool inMenu = false;
 Player player;
 Entity espada;
 Entity dog;
-Entity ghost;
 Entity tenosuke;
+Entity ghost;
 
 //Data structures
 std::vector<Entity> tiles;
@@ -181,26 +181,23 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
-
 	// Load Animations
 	heroblend = new Skeleton();
 	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
 	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
 	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
 	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
-	
+
 	// Load Entities
 	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(10.4f, 0, -10.8f));
 	espada = *new Entity("data/Assets/Meshes/espada1.obj", "data/Assets/Textures/espada1.png");
 	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
+	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(20.f, 0, -26.f), -60, 0.75);
 	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
-	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(109.f, 0, -36.f), -60, 0.75);
-	
 
 	// Load Map
 	my_world.loadMap("data/Assets/pueblo.csv");
 	generateMap(my_world.map, my_world.w, my_world.h);
-
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -299,8 +296,6 @@ void renderUI(int cuadrante, Texture* tex, float relation) {
 	shader->disable();
 }
 
-
-
 void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
 {
 	if (!shader)
@@ -349,9 +344,9 @@ void renderMap(int * map, int w, int h) {
 	shader_instanced->disable();
 }
 
-//what to do when the image has to be draw
 bool attack = false;
 float atk_time = 0.f;
+//what to do when the image has to be draw
 void Game::render(void)
 {
 	if(!free_cam){
@@ -390,13 +385,9 @@ void Game::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
-
-
-
-
 	//renderMesh(player.model, player.mesh, player.texture);
 	renderMesh(dog.model, dog.mesh, dog.texture);
-	renderMesh(ghost.model, ghost.mesh, ghost.texture);
+	if(ghost.life > 0.f) renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
 	heroidle->assignTime(time);
 	float run_time = fmod(time, herorun->duration);
@@ -408,7 +399,11 @@ void Game::render(void)
 		heroattack->assignTime(atk_time);
 		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, sin(atk_time * (PI/ heroattack->duration)), heroblend);
 		renderAnimated(player.model, player.mesh, player.texture, heroblend);
-		if (atk_time >= heroattack->duration) { attack = false; atk_time = 0;}
+		if (atk_time >= heroattack->duration) { 
+			attack = false; 
+			atk_time = 0;
+			ghost.wasHit = false;
+		}
 	}
 	else {
 		float frac = player.speed / player.max_speed;
@@ -416,18 +411,15 @@ void Game::render(void)
 		renderAnimated(player.model, player.mesh, player.texture, heroblend);
 	}
 
-	
-
 	heroblend->updateGlobalMatrices();
 	//mixamorig_RightHandIndex2
-	Matrix44 hand = heroblend->getBoneMatrix("mixamorig_RightHandIndex2", false);
-	hand = hand * player.model;
-	hand.scale(0.25, 0.25, 0.25);
-	hand.translate(0.1, 0, 0.1);
-	hand.rotate(80 * DEG2RAD, Vector3(1, 0, 0));
-	hand.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
-	renderMesh(hand, espada.mesh, espada.texture);
-
+	espada.model = heroblend->getBoneMatrix("mixamorig_RightHandIndex2", false);
+	espada.model = espada.model * player.model;
+	espada.model.scale(0.25, 0.25, 0.25);
+	espada.model.translate(0.1, 0, 0.1);
+	espada.model.rotate(80 * DEG2RAD, Vector3(1, 0, 0));
+	espada.model.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
+	renderMesh(espada.model, espada.mesh, espada.texture);
 	
 	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
 	tenosukedance->assignTime(time);
@@ -452,7 +444,7 @@ void Game::render(void)
 
 
 
-	//swap between front buffer and back buffer
+
 	
 	
 	
@@ -491,9 +483,8 @@ void Game::render(void)
 	//renderUI(0, textures[98]);
 	///////////////////////////////////////////
 
-
+	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
-
 }
 
 
@@ -516,6 +507,12 @@ void Game::update(double seconds_elapsed)
 		if (inMenu)  Stage::current_stage->changeStage("PlayStage"); 
 		else Stage::current_stage->changeStage("MenuStage");
 		inMenu = !inMenu;
+	}
+
+	if (!ghost.wasHit && attack && ghost.mesh->testSphereCollision(ghost.model, espada.model.getTranslation(), 0.5, Vector3(), Vector3()) ) {
+		ghost.wasHit = true;
+		ghost.life -= player.light_atk;
+		std::cout << "Ouch!!!\n" ;
 	}
 
 	if (!free_cam && !inMenu && !attack) {
@@ -574,7 +571,7 @@ void Game::update(double seconds_elapsed)
 		
 		std::vector<Entity> collidable = getNearEntities(player.pos.x, -player.pos.z);
 		collidable.insert(collidable.end(), trees.begin(), trees.end());
-		//collidable.push_back(ghost);
+		if (ghost.life > 0.f) collidable.push_back(ghost);
 		int size = collidable.size();
 
 		for (int i = 0; i < size; i++) {

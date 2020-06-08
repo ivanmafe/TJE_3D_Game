@@ -56,13 +56,7 @@ void Entity::setModelPos(Vector3 p) {
 	model.m[14] = p.z;
 }
 
+Enemy::Enemy() {}
+//loot = static_cast<Item>(rand() % item_names.size());
+//type = static_cast <EnemyType>(enemy_type);
 
-
-
-
-
-Enemy::Enemy(const char* m, const char* t, int enemy_type = 0):Entity(m,t) {
-
-	loot = static_cast<Item>(rand() % item_names.size());
-	type = static_cast <EnemyType>(enemy_type);
-}
