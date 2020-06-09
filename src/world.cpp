@@ -1,6 +1,6 @@
 #include "world.h"
 #include "utils.h"
-
+#include "game.h"
 
 void chooseModel(Matrix44 * m, int tile, int * index) {
 
@@ -79,9 +79,7 @@ bool World::isCellEmpty(float pos_x, float pos_y) {
 	else return true;
 }
 
-
 bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
-	
 	std::fstream file;
 	file.open(filesrc, std::fstream::in);
 	if (!file.is_open()) {
@@ -115,7 +113,111 @@ bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 	return true;
 }
 
-bool World::loadVegetation(const char* filesrc) {
+void World::generateMap(int* map, int w, int h) {
+	
 
-	return true;
+	Game * g = Game::instance;
+
+	int ind = 0;
+	for (int i = 0; i < h; ++i)
+		for (int j = 0; j < w; ++j) {
+			Matrix44 m;
+			m.translateGlobal(4. * i + 2, 0, -4. * j - 2);
+			int tmp = map[i * w + j];
+			chooseModel(&m, tmp, &ind);
+			Entity e;
+			e.mesh = g->meshes[ind];
+			e.texture = g->textures[ind];
+			e.model = m;
+			//if(poner_cosas que no van al array)
+			g->tiles.push_back(e);
+			if (ind != -1) g->models[ind].push_back(m);
+
+		}
+
+	int aux_h = h * 4;
+	int aux_w = w * 4;
+	for (int x = 0; x < aux_h; x++)
+		for (int z = 0; z < aux_w; z++) {
+			if ((rand() % 100) < 94) {
+				continue;
+			}
+			
+			if (isCellEmpty(x, z)) {
+				Entity ent;
+
+				//float s = 10 + random() * 4.0;
+				ent.model.rotate(random() * DEG2RAD, Vector3(0, 1, 0));
+				ent.model.setTranslation(x, 0, -z);
+				ent.model.scale(1.5, 1.5, 1.5);
+				g->models[9].push_back(ent.model);
+				ent.mesh = g->meshes[9];
+				ent.texture = g->textures[9];
+				g->trees.push_back(ent);
+			}
+
+		}
+
+
+	for (int x = 0; x < aux_h; x++)
+		for (int z = 0; z < aux_w; z++) {
+			if ((rand() % 100) < 90) {
+				continue;
+			}
+			Matrix44 model;
+			model.setTranslation(x, 0, -z);
+			model.rotate(random() * PI, Vector3(0, 1, 0));
+			g->models[8].push_back(model);
+		}
+
+}
+
+void World::renderMap(int* map, int w, int h, Shader* shad) {
+
+	Camera* camera = Camera::current;
+	Game* g = Game::instance;
+	//glDisable(GL_CULL_FACE);
+	shad->enable();
+	shad->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shad->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shad->setUniform("u_light_direction", Vector3(10, 3, -13));
+	shad->setUniform("u_camera_position", camera->eye);
+
+	for (int i = 0; i < 20; ++i) {
+		if (g->models[i].size() != 0) {
+
+			shad->setUniform("u_texture", Game::instance->textures[i]);
+			Game::instance->meshes[i]->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
+		}
+	}
+
+	shad->disable();
+}
+
+std::vector<Entity> World::getNearEntities(float pos_x, float pos_y) {
+	int x = (int)floor(pos_x) / 4;
+	int y = (int)floor(pos_y) / 4;
+
+	const std::vector<Entity> tiles = Game::instance->tiles;
+	std::vector<Entity> nearby;
+
+	nearby.push_back(tiles[x * w + y]);
+	if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * w + y]);
+	if (x + 1 < w) nearby.push_back(tiles[(x + 1) * w + y]);
+
+	if (y - 1 >= 0) {
+		nearby.push_back(tiles[x * w + (y - 1)]);
+		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * w + (y - 1)]);
+		if (x + 1 < w) nearby.push_back(tiles[(x + 1) * w + (y - 1)]);
+	}
+	if (y + 1 < w) {
+		nearby.push_back(tiles[x * w + (y + 1)]);
+		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * w + (y + 1)]);
+		if (x + 1 < w) nearby.push_back(tiles[(x + 1) * w + (y + 1)]);
+	}
+	/*
+	for(int i = 0 ; i < nearby.size() ; ++i)
+		std::cout << "entit" << i << " x:" << nearby[i].model.getTranslation().x / 4 << " z:" << nearby[i].model.getTranslation().z / 4 << '\n';
+		*/
+	return nearby;
 }

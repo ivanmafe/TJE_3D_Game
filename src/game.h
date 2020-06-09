@@ -8,12 +8,20 @@
 #include "includes.h"
 #include "camera.h"
 #include "utils.h"
-
+#include <vector>
+#include "entity.h"
+#include <array>
 class Game
 {
 public:
 	static Game* instance;
 
+	std::vector<Entity> tiles;
+	std::vector<Entity> trees;
+	Mesh* meshes[100];
+	Texture* textures[100];
+	std::vector<Matrix44> models[20];
+	
 	//window
 	SDL_Window* window;
 	int window_width;

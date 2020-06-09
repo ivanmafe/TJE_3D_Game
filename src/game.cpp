@@ -38,18 +38,12 @@ Entity tenosuke;
 Entity ghost;
 
 //Data structures
-std::vector<Entity> tiles;
-std::vector<Entity> trees;
-std::vector<std::vector<Matrix44>> models(20);
 std::map<std::string, Stage*> Stage::stages;
-Mesh * meshes[100];
-Texture * textures[100];
 Animation* tenosukedance;
 Animation* herorun;
 Animation* heroidle;
 Animation* heroattack;
 Skeleton* heroblend;
-
 
 //World and Execution
 World my_world;
@@ -58,89 +52,6 @@ Stage* Stage::current_stage = NULL;
 PlayStage play;
 DebugStage debug;
 MenuStage menu;
-
-
-std::vector<Entity> getNearEntities(float pos_x , float pos_y) {
-	int x = (int)floor(pos_x) / 4;
-	int y = (int)floor(pos_y) / 4;
-	
-	std::vector<Entity> nearby;
-
-
-	nearby.push_back(tiles[x * my_world.w + y]);
-	if (x-1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + y]);
-	if (x+1 < my_world.w ) nearby.push_back(tiles[(x + 1)  * my_world.w + y]);
-	
-	if (y - 1 >= 0) {
-		nearby.push_back(tiles[x * my_world.w + (y - 1)]);
-		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y - 1)]);
-		if (x + 1 < my_world.w) nearby.push_back(tiles[(x + 1)  * my_world.w + (y - 1)]);
-	}
-	if (y + 1 < my_world.w) {
-		nearby.push_back(tiles[x * my_world.w + (y + 1)]);
-		if (x - 1 >= 0) nearby.push_back(tiles[(x - 1) * my_world.w + (y + 1)]);
-		if (x + 1 < my_world.w) nearby.push_back(tiles[(x + 1)  * my_world.w + (y + 1)]);
-	}
-	/*
-	for(int i = 0 ; i < nearby.size() ; ++i)
-		std::cout << "entit" << i << " x:" << nearby[i].model.getTranslation().x / 4 << " z:" << nearby[i].model.getTranslation().z / 4 << '\n';
-		*/
-	return nearby;
-}
-
-void generateMap(int * map, int w, int h) {
-
-	int ind = 0;
-	for (int i = 0; i < h; ++i)
-		for (int j = 0; j < w; ++j) {
-			Matrix44 m;
-			m.translateGlobal(4.*i + 2, 0, -4.*j - 2);
-			int tmp = map[i * w + j];
-			chooseModel(&m, tmp, &ind);
-			Entity e;
-			e.mesh = meshes[ind];
-			e.texture = textures[ind];
-			e.model = m;
-			//if(poner_cosas que no van al array)
-			tiles.push_back(e);
-			if (ind != -1) models[ind].push_back(m);
-			
-		}
-
-	int aux_h = h * 4;
-	int aux_w = w * 4;
-	for (int x = 0; x < aux_h; x++)
-		for (int z = 0; z < aux_w; z++) {
-			if ((rand() % 100) < 94) {
-				continue;
-			}
-			if (my_world.isCellEmpty(x, z)) {
-				Entity ent;
-
-				//float s = 10 + random() * 4.0;
-				ent.model.rotate(random() * DEG2RAD, Vector3(0, 1, 0));
-				ent.model.setTranslation(x, 0, -z);
-				ent.model.scale(1.5, 1.5, 1.5);
-				models[9].push_back(ent.model);
-				ent.mesh = meshes[9];
-				ent.texture = textures[9];
-				trees.push_back(ent);
-			}
-
-		}
-
-
-	for (int x = 0; x < aux_h; x++)
-		for (int z = 0; z < aux_w; z++) {
-			if ((rand() % 100) < 90) {
-				continue;
-			}
-			Matrix44 model;
-			model.setTranslation(x, 0, -z);
-			model.rotate(random() * PI, Vector3(0, 1, 0));
-			models[8].push_back(model);
-		}
-}
 
 Game::Game(int window_width, int window_height, SDL_Window* window)
 {
@@ -197,7 +108,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	// Load Map
 	my_world.loadMap("data/Assets/pueblo.csv");
-	generateMap(my_world.map, my_world.w, my_world.h);
+	my_world.generateMap(my_world.map, my_world.w, my_world.h);
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
 }
@@ -323,27 +234,6 @@ void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
 	shader->disable();
 }
 
-void renderMap(int * map, int w, int h) {
-
-	Camera* camera = Camera::current;
-
-	//glDisable(GL_CULL_FACE);
-	shader_instanced->enable();
-	shader_instanced->setUniform("u_viewprojection", camera->viewprojection_matrix);
-	shader_instanced->setUniform("u_color", Vector4(1, 1, 1, 1));
-	shader_instanced->setUniform("u_light_direction", Vector3(10, 3, -13));
-	shader_instanced->setUniform("u_camera_position", camera->eye);
-
-	for (int i = 0; i < models.size(); ++i){
-		if (models[i].size() != 0) {
-			shader_instanced->setUniform("u_texture", textures[i]);
-			meshes[i]->renderInstanced(GL_TRIANGLES, &models[i][0], models[i].size());
-		}
-	}
-
-	shader_instanced->disable();
-}
-
 bool attack = false;
 float atk_time = 0.f;
 //what to do when the image has to be draw
@@ -437,7 +327,7 @@ void Game::render(void)
 	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	renderMesh(m, floor_mesh, floor_tex);
 
-	renderMap(my_world.map, my_world.w, my_world.h);
+	my_world.renderMap(my_world.map, my_world.w, my_world.h,shader_instanced);
 
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
 	Stage::current_stage->render();
@@ -569,7 +459,7 @@ void Game::update(double seconds_elapsed)
 
 		//para cada objecto de la escena...
 		
-		std::vector<Entity> collidable = getNearEntities(player.pos.x, -player.pos.z);
+		std::vector<Entity> collidable = my_world.getNearEntities(player.pos.x, -player.pos.z);
 		collidable.insert(collidable.end(), trees.begin(), trees.end());
 		if (ghost.life > 0.f) collidable.push_back(ghost);
 		int size = collidable.size();

@@ -1,0 +1,6 @@
+data/Assets/pueblo.csv
+2
+hero 10 -10
+tenosuke 17 -29
+1
+ghost 20 -26
