@@ -106,7 +106,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 
 	// Load Entities
 	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(10.4f, 0, -10.8f));
-	espada = *new Entity("data/Assets/Meshes/espada1.obj", "data/Assets/Textures/espada1.png");
+	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
 	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
 	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(20.f, 0, -26.f), -60, 0.75);
 	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
