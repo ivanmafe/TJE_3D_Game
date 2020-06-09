@@ -14,6 +14,8 @@
 #include "world.h"
 #include "stage.h"
 #include "data.h"
+#include <bass.h>
+#include "AudioBass.h"
 
 
 #include <cmath>
@@ -44,6 +46,9 @@ Animation* herorun;
 Animation* heroidle;
 Animation* heroattack;
 Skeleton* heroblend;
+
+MyAudioBass* sample;
+
 
 //World and Execution
 World my_world;
@@ -105,6 +110,10 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
 	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(20.f, 0, -26.f), -60, 0.75);
 	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
+
+	BASS_Init(-1, 44100, 0, 0, NULL);
+	sample = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
+	sample->PlaySoundAmbient();
 
 	// Load Map
 	my_world.loadMap("data/Assets/pueblo.csv");
