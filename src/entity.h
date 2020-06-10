@@ -39,14 +39,6 @@ public:
 	void setModelPos(Vector3 p);
 };
 
-class Enemy : public Entity {
-
-	Item loot;
-	EnemyType type;
-	float range = 7.5f;
-	bool wasHit = false;
-	Enemy();
-};
 
 
 #endif
