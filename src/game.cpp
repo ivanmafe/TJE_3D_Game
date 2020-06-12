@@ -32,9 +32,11 @@ std::map<std::string, Stage*> Stage::stages;
 //World and Execution
 Game* Game::instance = NULL;
 Stage* Stage::current_stage = NULL;
+IntroStage intro;
 PlayStage play;
 DebugStage debug;
 MenuStage menu;
+SelectStage selected;
 
 void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton) {
 
@@ -190,7 +192,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	BASS_Init(-1, 44100, 0, 0, NULL);
 	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav");
-	theme->PlaySoundAmbient(); 
+	//theme->PlaySoundAmbient(); 
 
 	// Load Map
 	my_world.loadScene("data/Assets/scene.txt");
