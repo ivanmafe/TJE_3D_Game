@@ -3,6 +3,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "texture.h"
+#include "game.h"
 
 
 Stage::Stage(const char* name) {
@@ -84,8 +85,10 @@ void SelectStage::render() {
 
 void SelectStage::update(double seconds_elapsed) {
 
-	if (Input::wasKeyPressed(SDL_SCANCODE_E))
+	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+		Game::instance->actualmision = actual;
 		Stage::current_stage->changeStage("PlayStage");
+	}
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_UP))
 		if(actual>1)
@@ -93,5 +96,7 @@ void SelectStage::update(double seconds_elapsed) {
 	if (Input::wasKeyPressed(SDL_SCANCODE_DOWN))
 		if (actual < 4)
 			actual += 1;
+
+
 
 };

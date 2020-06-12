@@ -38,6 +38,8 @@ DebugStage debug;
 MenuStage menu;
 SelectStage selected;
 
+
+
 void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton) {
 
 	Camera* camera = Camera::current;

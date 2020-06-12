@@ -18,6 +18,7 @@ void DebugStage::render() {
 	drawText(2, 30, gameTime, Vector3(1, 1, 1), 2);
 	drawText(2, 60, cameraPos, Vector3(1, 1, 1), 2);
 	drawText(2, 90, cameraDir, Vector3(1, 1, 1), 2);
+	drawText(2, 120, "actual mision:"+std::to_string(Game::instance->actualmision), Vector3(1, 1, 1), 2);
 
 	//Draw the floor grid
 	drawGrid();
