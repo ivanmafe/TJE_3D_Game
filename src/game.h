@@ -11,17 +11,26 @@
 #include <vector>
 #include "entity.h"
 #include <array>
+#include "world.h"
+#include <bass.h>
+#include "AudioBass.h"
+
 class Game
 {
 public:
 	static Game* instance;
 
+	World my_world;
 	std::vector<Entity> tiles;
 	std::vector<Entity> trees;
 	Mesh* meshes[100];
 	Texture* textures[100];
 	std::vector<Matrix44> models[20];
 	
+	//Audio
+	MyAudioBass* theme;
+	MyAudioBass* hit;
+
 	//window
 	SDL_Window* window;
 	int window_width;

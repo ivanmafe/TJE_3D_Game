@@ -7,9 +7,14 @@
 class Player : public Entity {
 public:
 
+	float moveAngle = 0.f;
 	float speed = 0.f;
 	float max_speed = 5;
+	int momentum = 0;
+	bool attack = false;
+	float atk_time = 0.f;
 	std::vector<Item> inventory[10];
+
 
 	Player();
 	Player(const char* m, const char* t, Vector3 pos);

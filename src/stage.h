@@ -4,7 +4,6 @@
 #include "utils.h"
 #include <map>
 
-
 class Stage
 {
 public:
@@ -15,44 +14,7 @@ public:
 
 	Stage(const char* name);
 	virtual void render();
-	virtual void update();
+	virtual void update(double seconds_elapsed);
 };
 
-class PlayStage : public Stage
-{
-public:
-	PlayStage();
-	void render();
-	void update();
-};
-
-class MenuStage : public Stage
-{
-public:
-	MenuStage();
-	void render();
-	void update();
-};
-
-class FightStage : public Stage
-{
-public:
-	FightStage();
-	void render();
-	void update();
-};
-
-class DebugStage : public Stage
-{
-public:
-	float camera_speed = 0.05;
-	DebugStage();
-	void render();
-	void update();
-};
-
-
-
-
-//
 #endif

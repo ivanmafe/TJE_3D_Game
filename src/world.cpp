@@ -221,3 +221,69 @@ std::vector<Entity> World::getNearEntities(float pos_x, float pos_y) {
 		*/
 	return nearby;
 }
+
+void World::loadScene(char* scene_name) {
+	std::cout << "\nLOADING SCENE!!!\n";
+	
+	std::fstream file;
+	file.open(scene_name, std::fstream::in);
+
+	if (!file.is_open()) {
+		fprintf(stderr, "Error locating the scene map\n");
+		return;
+	}
+
+	//LOAD MAP
+	std::string map_name;
+	file >> map_name;
+	std::cout << map_name << '\n';
+	loadMap(map_name);
+	generateMap(map, w, h);
+
+	file >> map_name;
+	char* cstr = new char[map_name.length() + 1];
+	strcpy(cstr, map_name.c_str());
+	minimap = Texture::Get(cstr);
+
+
+	std::string s;
+	float x, z, sk; int a;
+
+	// MAIN CHARACTERS
+	file >> s; std::cout << "Loading " + s + "\n";
+	file >> x; file >> z;
+	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(x, 0, z));
+	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
+	file >> s; std::cout << "Loading " + s + "\n";
+	file >> x; file >> z;
+	file >> a; file >> sk;
+	tenosuke = *new Entity(Vector3(x, 0, z), a, sk);
+
+	// Load Animations
+	player.skeleton = new Skeleton();
+	tenosuke.dance_anim = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
+	player.run_anim = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
+	player.idle_anim = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
+	player.attack_anim = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
+
+	// ALL ENEMIES
+	int enemy_ent = 0;
+	file >> enemy_ent;
+	for (int i = 0; i < enemy_ent; ++i) {
+		file >> s; 
+		file >> x; file >> z;
+		file >> a; file >> sk;
+		std::cout << "SCALE!!!! " << sk << '\n';
+		std::cout << s + " pos: " << x << ',' << z << '\n';
+		Enemy aux;
+		if (!s.compare("skeleton")) {
+			aux = *new Enemy("data/Assets/Meshes/skeleton.mesh", "data/Assets/Textures/skeleton.png", Vector3(x, 0, z), a, sk, -1);
+			aux.skeleton = new Skeleton();
+			aux.idle_anim = Animation::Get("data/Assets/animaciones/animations_praying.skanim");
+		}
+		enemies.push_back(aux);
+	}
+
+
+	
+}

@@ -11,13 +11,13 @@
 
 #include "entity.h"
 #include "entity_player.h"
+#include "entity_enemy.h"
 #include "world.h"
 #include "stage.h"
+#include "play_stage.h"
+#include "menu_stage.h"
+#include "debug_stage.h"
 #include "data.h"
-#include <bass.h>
-#include "AudioBass.h"
-
-
 #include <cmath>
 
 //shaders
@@ -26,40 +26,129 @@ Shader* shader_instanced = NULL;
 Shader* shader_blanc = NULL;
 Shader* anishader = NULL;
 
-//some globals
-Animation* anim = NULL;
-float angle = 0;
-bool free_cam = false;
-bool inMenu = false;
-
-//Active Entities
-Player player;
-Entity espada;
-Entity dog;
-Entity tenosuke;
-Entity ghost;
-
 //Data structures
 std::map<std::string, Stage*> Stage::stages;
-Animation* tenosukedance;
-Animation* herorun;
-Animation* heroidle;
-Animation* heroattack;
-Skeleton* heroblend;
-
-MyAudioBass* sample;
-
 
 //World and Execution
-World my_world;
 Game* Game::instance = NULL;
 Stage* Stage::current_stage = NULL;
 PlayStage play;
 DebugStage debug;
 MenuStage menu;
 
+void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton) {
+
+	Camera* camera = Camera::current;
+	Vector3 pos = m * mesh->box.center;
+
+	BoundingBox global_box = transformBoundingBox(m, mesh->box);
+	if (!camera->testBoxInFrustum(global_box.center, global_box.halfsize)) {
+		return;
+	}
+	glPointSize(5);
+	anishader = Shader::Get("data/shaders/skinning.vs", "data/shaders/textured.fs");
+
+	anishader->enable();
+
+	anishader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	anishader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	if (texture)
+		anishader->setUniform("u_texture", texture);
+	anishader->setUniform("u_model", m);
+	anishader->setUniform("u_texture_tiling", 1.0f);
+	anishader->setUniform("u_time", Game::instance->time);
+	anishader->setUniform("u_camera_position", camera->eye);
+	anishader->setUniform("u_light_direction", Vector3(0.3, 0.6, 0.2).normalize());
+
+	mesh->renderAnimated(GL_TRIANGLES, skeleton);
+
+	anishader->disable();
+}
+
+void renderMinimap(Texture* tex) {
+
+	Player player = Game::instance->my_world.player;
+
+	glDisable(GL_DEPTH_TEST);
+	Mesh quad;
+	quad.createQuad(0.7, -0.7, 0.4, 0.5, false);
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
+	shader->enable();
+	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_texture", tex);
+	quad.render(GL_TRIANGLES);
+	shader->disable();
+
+	glEnable(GL_CULL_FACE);
+	Mesh quad2;
+
+	float x = -((player.pos.z / (Game::instance->my_world.h * 2)));
+	float y = (player.pos.x / -(Game::instance->my_world.h * 2)) + 2;
+
+	x = (x * 0.2f) + 1.5f;
+	y = (y * 0.25f) + 0.05f;
+
+	quad2.vertices.push_back(Vector3(-1 + x, (-0.99f + y), 0));
+	quad2.vertices.push_back(Vector3(-1.01f + x, (-1.01f + y), 0));
+	quad2.vertices.push_back(Vector3(-0.99f + x, (-1.01f + y), 0));
+
+
+	Shader* shader2 = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
+	shader2->enable();
+	shader2->setUniform("u_color", Vector4(0, 0, 1, 1));
+	quad2.render(GL_TRIANGLES);
+	shader2->disable();
+}
+
+void renderUI(int cuadrante, Texture* tex, float relation) {
+	
+	glDisable(GL_DEPTH_TEST);
+	Mesh quad;
+
+	if (cuadrante == 0) quad.createQuad(0, 0, 2, 2, false);
+	else if (cuadrante == 1) quad.createQuad(0.5, 0.5, 1, 1, false);
+	else if (cuadrante == 2) quad.createQuad(-0.5, 0.5, 1, 1, false);
+	else if (cuadrante == 3) quad.createQuad(-0.5, -0.5, 1, 1, false);
+	else if (cuadrante == 4) quad.createQuad(0.5, -0.5, 1, 1, false);
+
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
+	shader->enable();
+	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_texture", tex);
+	quad.render(GL_TRIANGLES);
+	shader->disable();
+}
+
+void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
+{
+	if (!shader)
+		return;
+
+	Camera* camera = Camera::current;
+
+	//enable shader
+	shader->enable();
+
+	//upload uniforms
+	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_texture", texture);
+	shader->setUniform("u_model", m);
+	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
+	shader->setUniform("u_camera_position", camera->eye);
+
+	//shader->setUniform("u_time", time);
+
+
+	mesh->render(GL_TRIANGLES);
+
+	//disable shader
+	shader->disable();
+}
+
 Game::Game(int window_width, int window_height, SDL_Window* window)
 {
+	
 	this->window_width = window_width;
 	this->window_height = window_height;
 	this->window = window;
@@ -93,182 +182,37 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 		meshes[i] = Mesh::Get(const_cast<char*>(s1.c_str()));
 		textures[i] = Texture::Get(const_cast<char*>(s2.c_str()));
 	}
-	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimapa.png");
+	textures[96] = Texture::Get("data/Assets/Textures/GUI/minimap_pueblo.png");
+	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimap_greenland.png");
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
-	// Load Animations
-	heroblend = new Skeleton();
-	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
-	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
-	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
-	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
-
-	// Load Entities
-	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(10.4f, 0, -10.8f));
-	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
-	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
-	ghost = *new Entity("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(20.f, 0, -26.f), -60, 0.75);
-	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
-
 	BASS_Init(-1, 44100, 0, 0, NULL);
-	sample = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
-	sample->PlaySoundAmbient();
+	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
+	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav");
+	theme->PlaySoundAmbient(); 
 
 	// Load Map
-	my_world.loadMap("data/Assets/pueblo.csv");
-	my_world.generateMap(my_world.map, my_world.w, my_world.h);
+	my_world.loadScene("data/Assets/scene.txt");
+
 	//hide the cursor
-	SDL_ShowCursor(!mouse_locked); //hide or show the mouse
+	SDL_ShowCursor(!mouse_locked); //hide or show the mouse	
 }
 
-void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton) {
-
-	Camera* camera = Camera::current;
-	Vector3 pos = m * mesh->box.center;
-
-	BoundingBox global_box = transformBoundingBox(m, mesh->box);
-	if (!camera->testBoxInFrustum(global_box.center, global_box.halfsize)) {
-		return;
-	}
-	glPointSize(5);
-	anishader = Shader::Get("data/shaders/skinning.vs", "data/shaders/textured.fs");
-
-	anishader->enable();
-
-	anishader->setUniform("u_color", Vector4(1, 1, 1, 1));
-	anishader->setUniform("u_viewprojection", camera->viewprojection_matrix);
-	if (texture)
-		anishader->setUniform("u_texture", texture);
-	anishader->setUniform("u_model", m);
-	anishader->setUniform("u_texture_tiling", 1.0f);
-	anishader->setUniform("u_time", Game::instance->time);
-	anishader->setUniform("u_camera_position", camera->eye);
-	anishader->setUniform("u_light_direction", Vector3(0.3,0.6,0.2).normalize());
-
-	mesh->renderAnimated(GL_TRIANGLES, skeleton);
-
-	anishader->disable();
-
-
-}
-
-void renderUI(int cuadrante, Texture* tex, float relation) {
-	glDisable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	Mesh quad;
-
-	if (cuadrante == 0) {
-
-		//existia la funcion quad.createQuad(centro, ancho, alto (w/ float h), invertir evs)...
-		//o pasandole pixels y una camara asi:
-		/*
-		glDisable(GL_CULL_FACE)
-		Camera cam2D;
-		cam2D.setOrthographic(0,w_w,w_h,0,-1,1);
-		cam2D.enable();
-		shader->setUniform("u_model", matrix44());
-		shader->setUniform("u_viewprojection", cam2D.viewprojection_matrix);
-		
-		*/
-
-
-		/*quad.vertices.push_back(Vector3(-1, 1, 0));
-		quad.uvs.push_back(Vector2(0, 1));
-		quad.vertices.push_back(Vector3(-1, -1, 0));
-		quad.uvs.push_back(Vector2(0, 0));
-		quad.vertices.push_back(Vector3(1, 1, 0));
-		quad.uvs.push_back(Vector2(1, 1));
-
-		quad.vertices.push_back(Vector3(1, 1, 0));
-		quad.uvs.push_back(Vector2(1, 1));
-		quad.vertices.push_back(Vector3(-1, -1, 0));
-		quad.uvs.push_back(Vector2(0, 0));
-		quad.vertices.push_back(Vector3(1, -1, 0));
-		quad.uvs.push_back(Vector2(1, 0));
-		*/
-
-		quad.createQuad(0, 0, 2, 2 , false);
-	}
-	else if (cuadrante == 1) {
-		
-		quad.createQuad(0.5, 0.5, 1, 1, false);
-	}
-	else if (cuadrante == 2) {
-		
-		quad.createQuad(-0.5, 0.5, 1, 1, false);
-	}
-	else if (cuadrante == 3) {
-		
-		quad.createQuad(-0.5, -0.5, 1, 1, false);
-		
-	}
-	else if (cuadrante == 4) {
-		
-		quad.createQuad(0.5, -0.5, 1, 1, false);
-	}
-	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");//flat.fs");
-	shader->enable();
-	shader->setUniform("u_color", Vector4(1,1,1,1));
-	shader->setUniform("u_texture", tex);
-	//shader->setUniform("u_texture_tiling", 1.0f);
-	quad.render(GL_TRIANGLES);
-	shader->disable();
-}
-
-void renderMesh(Matrix44 m, Mesh* mesh, Texture* texture, int submesh = -1)
-{
-	if (!shader)
-		return;
-
-	Camera* camera = Camera::current;
-
-	//enable shader
-	shader->enable();
-
-	//upload uniforms
-	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
-	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
-	shader->setUniform("u_texture", texture);
-	shader->setUniform("u_model", m);
-	shader->setUniform("u_light_direction", Vector3(10, 3, -13));
-	shader->setUniform("u_camera_position", camera->eye);
-	
-	//shader->setUniform("u_time", time);
-
-	
-	mesh->render(GL_TRIANGLES);
-
-	//disable shader
-	shader->disable();
-}
-
-bool attack = false;
-float atk_time = 0.f;
-//what to do when the image has to be draw
 void Game::render(void)
 {
-	if(!free_cam){
-
-		camera->eye = player.model * Vector3(0, 1.25, 1);   //0,1.3,0.5   //0.5 GUAY
-		camera->center = player.model * Vector3(0, 0.7, -0.5);
-	}
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	//set the camera as default
 	camera->enable();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	////////////////////////////////////////////////////////////////////// pintar cielo
+	//// DRAW THE SKY ////
 	glDisable(GL_DEPTH_TEST);
 	Matrix44 m2;
 	m2.setIdentity();
 
-	//enable shader
 	shader_blanc->enable();
 
-	//upload uniforms
 	shader_blanc->setUniform("u_color", Vector4(1, 1, 1, 1) * 0.6);
 	shader_blanc->setUniform("u_viewprojection", camera->viewprojection_matrix);
 	shader_blanc->setUniform("u_texture", textures[7]);
@@ -276,252 +220,93 @@ void Game::render(void)
 
 	meshes[7]->render(GL_TRIANGLES);
 	shader_blanc->disable();
-
-	//////////////////////////////////////////////////////////////////////
-
-	//set flags
+	//////////////////////
+	
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-   
-	//renderMesh(player.model, player.mesh, player.texture);
-	renderMesh(dog.model, dog.mesh, dog.texture);
-	if(ghost.life > 0.f) renderMesh(ghost.model, ghost.mesh, ghost.texture);
 
-	heroidle->assignTime(time);
-	float run_time = fmod(time, herorun->duration);
-	herorun->assignTime(run_time);
+	//// DRAW THE PLAYER ////
+	Player player = my_world.player;
+	player.idle_anim->assignTime(time);
+	float run_time = fmod(time, player.run_anim->duration);
+	player.run_anim->assignTime(run_time);
 
-	if (attack) {
-		if (atk_time == 0.f) heroattack->assignTime(0);
-		atk_time += Game::instance->elapsed_time;
-		heroattack->assignTime(atk_time);
-		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, sin(atk_time * (PI/ heroattack->duration)), heroblend);
-		renderAnimated(player.model, player.mesh, player.texture, heroblend);
-		if (atk_time >= heroattack->duration) { 
-			attack = false; 
-			atk_time = 0;
-			ghost.wasHit = false;
+	if (player.attack) {
+		if (player.atk_time == 0.f) player.attack_anim->assignTime(0);
+		player.atk_time += Game::instance->elapsed_time;
+		player.attack_anim->assignTime(player.atk_time);
+		blendSkeleton(&player.idle_anim->skeleton, &player.attack_anim->skeleton, sin(player.atk_time * (PI/ player.attack_anim->duration)), player.skeleton);
+		renderAnimated(player.model, player.mesh, player.texture, player.skeleton);
+		if (player.atk_time >= player.attack_anim->duration) {
+			player.attack = false;
+			player.atk_time = 0;
+			for (int k = 0; k < my_world.enemies.size(); ++k) my_world.enemies[k].wasHit = false;
 		}
 	}
 	else {
 		float frac = player.speed / player.max_speed;
-		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, max(0, frac), heroblend);
-		renderAnimated(player.model, player.mesh, player.texture, heroblend);
+		blendSkeleton(&player.idle_anim->skeleton, &player.run_anim->skeleton, max(0, frac), player.skeleton);
+		renderAnimated(player.model, player.mesh, player.texture, player.skeleton);
 	}
-
-	heroblend->updateGlobalMatrices();
-	//mixamorig_RightHandIndex2
-	espada.model = heroblend->getBoneMatrix("mixamorig_RightHandIndex2", false);
+	player.skeleton->updateGlobalMatrices();
+	my_world.player = player;
+	/////////////////////////
+	
+	//// DRAW THE PLAYER SWORD ////
+	Entity espada = my_world.espada;
+	espada.model = player.skeleton->getBoneMatrix("mixamorig_RightHandIndex2", false);
 	espada.model = espada.model * player.model;
-	espada.model.scale(0.25, 0.25, 0.25);
+	espada.model.scale(0.75f, 0.75f, 0.75f);
 	espada.model.translate(0.1, 0, 0.1);
 	espada.model.rotate(80 * DEG2RAD, Vector3(1, 0, 0));
 	espada.model.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
 	renderMesh(espada.model, espada.mesh, espada.texture);
-	
-	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
-	tenosukedance->assignTime(time);
-	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke->model);
+	my_world.espada = espada;
+	///////////////////////////////
 
-	//Skeleton result; //no hacer en local
-	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
-	//result.renderSkeleton(camera, tenosuke.model);
+	//// DRAW STORE CHARACTER ////
+	my_world.tenosuke.dance_anim->assignTime(time);
+	renderAnimated(my_world.tenosuke.model, meshes[10], textures[10], &my_world.tenosuke.dance_anim->skeleton);
+	//////////////////////////////
 	
-	// Render World Floor
+	//// DRAW WORLD FLOOR ////
 	Matrix44 m;
 	Mesh* floor_mesh = new Mesh();
 	floor_mesh->createPlane(2 * max(my_world.h, my_world.w));
 	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
 	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	renderMesh(m, floor_mesh, floor_tex);
+	//////////////////////////
+
+	//// DRAW WORLD ENEMIES ////
+	for (int k = 0; k < my_world.enemies.size(); ++k) {
+		Enemy eaux = my_world.enemies[k];
+		if (eaux.life > 0.f) {
+			eaux.idle_anim->assignTime(time);
+			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+		}
+	}
+	////////////////////////////
 
 	my_world.renderMap(my_world.map, my_world.w, my_world.h,shader_instanced);
-
-	//DRAW UI OR STAGE SPECIFIC ELEMENTS
+	renderMinimap(my_world.minimap);
 	Stage::current_stage->render();
 
-
-
-
-	
-	
-	
-
-
-	//////////////////////////////////////////menu vida
-	float aux = (window_width / (float)window_height);
-	renderUI(2, textures[99], aux);
-	renderUI(4, textures[97], aux);
-	//renderUI(0, textures[98], aux);
-
-	
-	
-	
-	///personaje en mini mapa
-
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	Mesh quad;
-
-	float x = -((player.pos.z /220)-1.34);//bastante bien
-	float y = (player.pos.x / (60 * -2.7))  +0.85 ;
-
-
-	quad.vertices.push_back(Vector3(-0.98f +x, (-0.96f + y) , 0));
-	quad.vertices.push_back(Vector3(-1 +x, (-1 + y), 0));
-	quad.vertices.push_back(Vector3(-0.96f +x , (-1 + y) , 0));
-
-	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/flat.fs");
-	shader->enable();
-	shader->setUniform("u_color", Vector4(0, 0,1, 1));
-	quad.render(GL_TRIANGLES);
-
-
-	///////////////////////////////////////// sangre vida
+	//// DRAW GUI ELEMENTS ////
+	//float aux = (window_width / (float)window_height);
+	//renderUI(2, textures[99], aux);
+	//renderUI(4, textures[97], aux);
+	// sangre vida
 	//renderUI(0, textures[98]);
-	///////////////////////////////////////////
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
 }
 
-
 void Game::update(double seconds_elapsed)
 {
-
-	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
-		attack = true;
-		player.speed = 0.f;
-	}
-
-
-	if (Input::wasKeyPressed(SDL_SCANCODE_V)) {
-		if (free_cam) { Stage::current_stage->changeStage("MenuStage"); inMenu = true; }
-		else { Stage::current_stage->changeStage("DebugStage");  inMenu = false; }
-		free_cam = !free_cam;
-	}
-
-	if (Input::wasKeyPressed(SDL_SCANCODE_M)) {
-		if (inMenu)  Stage::current_stage->changeStage("PlayStage"); 
-		else Stage::current_stage->changeStage("MenuStage");
-		inMenu = !inMenu;
-	}
-
-	if (!ghost.wasHit && attack && ghost.mesh->testSphereCollision(ghost.model, espada.model.getTranslation(), 0.5, Vector3(), Vector3()) ) {
-		ghost.wasHit = true;
-		ghost.life -= player.light_atk;
-		std::cout << "Ouch!!!\n" ;
-	}
-
-	if (!free_cam && !inMenu && !attack) {
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		Vector3 targetpos = player.pos;
-		Matrix44 R;
-		R.setRotation(player.angle * DEG2RAD, Vector3(0, 1, 0));
-		Vector3 front = R.rotateVector(Vector3(0, 0, -1));
-		Vector3 Right = R.rotateVector(Vector3(1, 0, -0));
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		Stage::current_stage->update();
-
-		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
-			player.momentum = 1;
-			if (player.speed < player.max_speed) player.speed += 0.07f;
-			targetpos = player.pos + front * player.speed * seconds_elapsed;
-		}
-		else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
-			player.momentum = -1;
-			if (player.speed < player.max_speed) player.speed += 0.07f;
-			targetpos = player.pos - front * player.speed * seconds_elapsed;
-		}
-		else {
-			if (player.speed > 0.f) {
-				targetpos = player.pos + (front * player.momentum) * player.speed * seconds_elapsed;
-				player.speed -= 0.05;
-			} 
-		}
-		
-
-
-
-
-		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
-			player.angle -= 90 * seconds_elapsed;
-		}if (Input::isKeyPressed(SDL_SCANCODE_D)) {
-			player.angle += 90 * seconds_elapsed;
-		}
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//COLISIONES	
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-		//calculamos el centro de la esfera de colisión del player elevandola hasta la cintura
-		Vector3 character_center = targetpos + Vector3(0, 0.3, 0);
-
-		bool hascollision = false;
-
-		//para cada objecto de la escena...
-		
-		std::vector<Entity> collidable = my_world.getNearEntities(player.pos.x, -player.pos.z);
-		collidable.insert(collidable.end(), trees.begin(), trees.end());
-		if (ghost.life > 0.f) collidable.push_back(ghost);
-		int size = collidable.size();
-
-		for (int i = 0; i < size; i++) {
-
-			Entity ent = collidable[i];
-			Vector3 v = ent.model.getTranslation();
-			if (ent.mesh == NULL) continue;
-			Mesh* mesh = ent.mesh;
-
-
-			//comprobamos si colisiona el objeto con la esfera (radio 3)
-			Vector3 coll;
-			Vector3 collnorm;
-			if (mesh->testSphereCollision(ent.model, character_center, 0.2, coll, collnorm) == false)
-				continue; //si no colisiona, pasamos al siguiente objeto
-			hascollision = true;
-			Vector3 contrapush = normalize(coll - character_center) * seconds_elapsed;   ///faltaria interpolar la posicion actual con la del rebote para que no tiemble tanto
-
-			targetpos = player.pos - contrapush;
-			targetpos.y = 0;
-			break;
-			//si la esfera está colisionando muevela a su posicion anterior alejandola del objeto
-
-
-		}
-		player.pos = targetpos;
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-		player.model.setIdentity();
-		player.model.setTranslation(player.pos.x, player.pos.y, player.pos.z);
-		player.model.rotate(player.angle * DEG2RAD, Vector3(0, 0.5f, 0));
-
-
-		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {}
-		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) {}
-		
-		dog.pos = player.pos - Vector3(0.3f, 0, 0.4f);
-		dog.model = player.model;
-		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
-		dog.setModelPos(aux);
-
-		//GET PLAYER POS
-		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
-			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
-			std::cout << player.speed << '\n';
-		}
-	}
-	else Stage::current_stage->update();
-	
+	Stage::current_stage->update(seconds_elapsed);
 
 	if (mouse_locked)
 		Input::centerMouse();
@@ -533,7 +318,6 @@ void Game::onKeyDown( SDL_KeyboardEvent event )
 	switch(event.keysym.sym)
 	{
 		case SDLK_ESCAPE: must_exit = true; break; //ESC key, kill the app
-		case SDLK_TAB: free_cam = !free_cam; break;
 		case SDLK_F1: Shader::ReloadAll(); break; 
 	}
 }

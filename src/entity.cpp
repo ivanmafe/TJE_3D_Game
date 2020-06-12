@@ -54,9 +54,5 @@ void Entity::setModelPos(Vector3 p) {
 	model.m[12] = p.x;
 	model.m[13] = p.y;
 	model.m[14] = p.z;
+	pos = Vector3(p.x, p.y , p.z);
 }
-
-Enemy::Enemy() {}
-//loot = static_cast<Item>(rand() % item_names.size());
-//type = static_cast <EnemyType>(enemy_type);
-
