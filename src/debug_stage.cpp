@@ -27,7 +27,11 @@ void DebugStage::render() {
 
 };
 
-void DebugStage::update() {
+void DebugStage::update(double seconds_elapsed) {
+
+	if (Input::wasKeyPressed(SDL_SCANCODE_V))
+		Stage::current_stage->changeStage("MenuStage");
+
 
 	Camera * camera = Camera::current;
 	//mouse input to rotate the cam

@@ -14,7 +14,7 @@ public:
 
 	Stage(const char* name);
 	virtual void render();
-	virtual void update();
+	virtual void update(double seconds_elapsed);
 };
 
 #endif

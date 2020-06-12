@@ -9,7 +9,7 @@ class MenuStage : public Stage
 public:
 	MenuStage();
 	void render();
-	void update();
+	void update(double seconds_elapsed);
 };
 
 #endif

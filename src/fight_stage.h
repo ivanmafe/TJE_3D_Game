@@ -9,7 +9,7 @@ class FightStage : public Stage
 public:
 	FightStage();
 	void render();
-	void update();
+	void update(double seconds_elapsed);
 };
 
 #endif

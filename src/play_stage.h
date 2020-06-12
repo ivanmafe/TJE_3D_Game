@@ -9,7 +9,7 @@ class PlayStage : public Stage
 public:
 	PlayStage();
 	void render();
-	void update();
+	void update(double seconds_elapsed);
 };
 
 #endif

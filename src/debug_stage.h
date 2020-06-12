@@ -10,7 +10,7 @@ public:
 	float camera_speed = 0.05;
 	DebugStage();
 	void render();
-	void update();
+	void update(double seconds_elapsed);
 };
 
 #endif

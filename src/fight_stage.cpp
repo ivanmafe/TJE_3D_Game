@@ -8,4 +8,4 @@ void FightStage::render() {
 	drawText(2, 20, "FightStage", Vector3(1, 1, 1), 5);
 };
 
-void FightStage::update() {};
+void FightStage::update(double seconds_elapsed) {};

@@ -12,6 +12,9 @@
 #include "entity.h"
 #include <array>
 #include "world.h"
+#include <bass.h>
+#include "AudioBass.h"
+
 class Game
 {
 public:
@@ -24,6 +27,10 @@ public:
 	Texture* textures[100];
 	std::vector<Matrix44> models[20];
 	
+	//Audio
+	MyAudioBass* theme;
+	MyAudioBass* hit;
+
 	//window
 	SDL_Window* window;
 	int window_width;
