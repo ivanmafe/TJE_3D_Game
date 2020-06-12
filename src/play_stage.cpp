@@ -1,4 +1,6 @@
 #include "play_stage.h"
+#include "input.h"
+#include "world.h"
 
 PlayStage::PlayStage() : Stage("PlayStage") {
 	//empty constructor
@@ -12,7 +14,6 @@ void PlayStage::render() {
 };
 
 void PlayStage::update() {
-
 
 
 

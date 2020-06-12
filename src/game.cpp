@@ -20,8 +20,6 @@
 #include "data.h"
 #include <bass.h>
 #include "AudioBass.h"
-
-
 #include <cmath>
 
 //shaders
@@ -31,31 +29,16 @@ Shader* shader_blanc = NULL;
 Shader* anishader = NULL;
 
 //some globals
-Animation* anim = NULL;
-float angle = 0;
 bool free_cam = false;
 bool inMenu = false;
 
-//Active Entities
-Player player;
-Entity espada;
-Entity dog;
-Entity tenosuke;
-Enemy ghost;
 
 //Data structures
 std::map<std::string, Stage*> Stage::stages;
-Animation* tenosukedance;
-Animation* herorun;
-Animation* heroidle;
-Animation* heroattack;
-Skeleton* heroblend;
 
 MyAudioBass* sample;
 
-
 //World and Execution
-World my_world;
 Game* Game::instance = NULL;
 Stage* Stage::current_stage = NULL;
 PlayStage play;
@@ -95,10 +78,12 @@ void renderAnimated(Matrix44 m, Mesh* mesh, Texture* texture, Skeleton* skeleton
 
 void renderMinimap(Texture* tex) {
 
+	Player player = Game::instance->my_world.player;
+
 	glDisable(GL_DEPTH_TEST);
 	Mesh quad;
 	quad.createQuad(0.7, -0.7, 0.4, 0.5, false);
-	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
 	shader->enable();
 	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
 	shader->setUniform("u_texture", tex);
@@ -108,8 +93,8 @@ void renderMinimap(Texture* tex) {
 	glEnable(GL_CULL_FACE);
 	Mesh quad2;
 
-	float x = -((player.pos.z / (my_world.h * 2)));
-	float y = (player.pos.x / -(my_world.h * 2)) + 2;
+	float x = -((player.pos.z / (Game::instance->my_world.h * 2)));
+	float y = (player.pos.x / -(Game::instance->my_world.h * 2)) + 2;
 
 	x = (x * 0.2f) + 1.5f;
 	y = (y * 0.25f) + 0.05f;
@@ -119,7 +104,7 @@ void renderMinimap(Texture* tex) {
 	quad2.vertices.push_back(Vector3(-0.99f + x, (-1.01f + y), 0));
 
 
-	Shader* shader2 = Shader::Get("data/shaders/quad.vs", "data/shaders/flat.fs");
+	Shader* shader2 = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
 	shader2->enable();
 	shader2->setUniform("u_color", Vector4(0, 0, 1, 1));
 	quad2.render(GL_TRIANGLES);
@@ -180,7 +165,7 @@ void renderUI(int cuadrante, Texture* tex, float relation) {
 
 		quad.createQuad(0.5, -0.5, 1, 1, false);
 	}
-	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/texture.fs");//flat.fs");
+	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
 	shader->enable();
 	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
 	shader->setUniform("u_texture", tex);
@@ -257,40 +242,24 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
-	// Load Animations
-	heroblend = new Skeleton();
-	tenosukedance = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
-	herorun = Animation::Get("data/Assets/animaciones/fast_run2.skanim");
-	heroidle = Animation::Get("data/Assets/animaciones/heroe_idle.skanim");
-	heroattack = Animation::Get("data/Assets/animaciones/hero_atack1.skanim");
-
-	// Load Entities
-	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(10.4f, 0, -10.8f));
-	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
-	dog = *new Entity("data/Assets/Meshes/Dog.obj", "data/Assets/Textures/Dog.tga");
-	ghost = *new Enemy("data/Assets/Meshes/Ghost.obj", "data/Assets/Textures/Ghost_Violet.tga", Vector3(20.f, 0, -26.f), -60, 0.75, 0);
-	tenosuke = *new Entity(Vector3(17.2f, 0, -28.9f), -60, 0.25);
-
 	BASS_Init(-1, 44100, 0, 0, NULL);
 	sample = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
-	sample->PlaySoundAmbient();
+	//sample->PlaySoundAmbient();
 
 	// Load Map
-	my_world.loadMap("data/Assets/pueblo.csv");
-	my_world.generateMap(my_world.map, my_world.w, my_world.h);
+	my_world.loadScene("data/Assets/scene.txt");
+
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse	
 }
 
-bool attack = false;
-float atk_time = 0.f;
 //what to do when the image has to be draw
 void Game::render(void)
 {
+	Player player = my_world.player;
 	if(!free_cam){
-
-		camera->eye = player.model * Vector3(0, 1.25, 1);   //0,1.3,0.5   //0.5 GUAY
-		camera->center = player.model * Vector3(0, 0.7, -0.5);
+		camera->eye = Vector3(player.pos.x + sin(player.angle), 1.25, player.pos.z + cos(player.angle));
+		camera->center = player.pos + Vector3(0,0.7,0);
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -323,50 +292,46 @@ void Game::render(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
    
-	//renderMesh(player.model, player.mesh, player.texture);
-	renderMesh(dog.model, dog.mesh, dog.texture);
-	if(ghost.life > 0.f) renderMesh(ghost.model, ghost.mesh, ghost.texture);
+	player.idle_anim->assignTime(time);
+	float run_time = fmod(time, player.run_anim->duration);
+	player.run_anim->assignTime(run_time);
 
-	heroidle->assignTime(time);
-	float run_time = fmod(time, herorun->duration);
-	herorun->assignTime(run_time);
-
-	if (attack) {
-		if (atk_time == 0.f) heroattack->assignTime(0);
-		atk_time += Game::instance->elapsed_time;
-		heroattack->assignTime(atk_time);
-		blendSkeleton(&heroidle->skeleton, &heroattack->skeleton, sin(atk_time * (PI/ heroattack->duration)), heroblend);
-		renderAnimated(player.model, player.mesh, player.texture, heroblend);
-		if (atk_time >= heroattack->duration) { 
-			attack = false; 
-			atk_time = 0;
-			ghost.wasHit = false;
+	if (player.attack) {
+		if (player.atk_time == 0.f) player.attack_anim->assignTime(0);
+		player.atk_time += Game::instance->elapsed_time;
+		player.attack_anim->assignTime(player.atk_time);
+		blendSkeleton(&player.idle_anim->skeleton, &player.attack_anim->skeleton, sin(player.atk_time * (PI/ player.attack_anim->duration)), player.skeleton);
+		renderAnimated(player.model, player.mesh, player.texture, player.skeleton);
+		if (player.atk_time >= player.attack_anim->duration) {
+			player.attack = false;
+			player.atk_time = 0;
+			for (int k = 0; k < my_world.enemies.size(); ++k) my_world.enemies[k].wasHit = false;
 		}
 	}
 	else {
 		float frac = player.speed / player.max_speed;
-		blendSkeleton(&heroidle->skeleton, &herorun->skeleton, max(0, frac), heroblend);
-		renderAnimated(player.model, player.mesh, player.texture, heroblend);
+		blendSkeleton(&player.idle_anim->skeleton, &player.run_anim->skeleton, max(0, frac), player.skeleton);
+		renderAnimated(player.model, player.mesh, player.texture, player.skeleton);
 	}
 
-	heroblend->updateGlobalMatrices();
+	player.skeleton->updateGlobalMatrices();
 	//mixamorig_RightHandIndex2
-	espada.model = heroblend->getBoneMatrix("mixamorig_RightHandIndex2", false);
+	Entity espada = my_world.espada;
+	espada.model = player.skeleton->getBoneMatrix("mixamorig_RightHandIndex2", false);
 	espada.model = espada.model * player.model;
-	espada.model.scale(0.25, 0.25, 0.25);
+	espada.model.scale(0.75f, 0.75f, 0.75f);
 	espada.model.translate(0.1, 0, 0.1);
 	espada.model.rotate(80 * DEG2RAD, Vector3(1, 0, 0));
 	espada.model.rotate(60 * DEG2RAD, Vector3(0, 1, 0));
 	renderMesh(espada.model, espada.mesh, espada.texture);
-	
-	renderAnimated(tenosuke.model, meshes[10], textures[10], &tenosukedance->skeleton);
-	tenosukedance->assignTime(time);
-	//tenosukedance->skeleton.renderSkeleton(camera, tenosuke->model);
+	my_world.espada = espada;
 
-	//Skeleton result; //no hacer en local
-	//blendSkeleton(&tenosukedance->skeleton, &anim2->skeleton, 0.5, &result); //para fusionar animaciones
-	//result.renderSkeleton(camera, tenosuke.model);
+	my_world.tenosuke.dance_anim->assignTime(time);
+	renderAnimated(my_world.tenosuke.model, meshes[10], textures[10], &my_world.tenosuke.dance_anim->skeleton);
+
 	
+	my_world.player = player;
+
 	// Render World Floor
 	Matrix44 m;
 	Mesh* floor_mesh = new Mesh();
@@ -375,6 +340,14 @@ void Game::render(void)
 	Texture* floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	renderMesh(m, floor_mesh, floor_tex);
 
+
+	for (int k = 0; k < my_world.enemies.size(); ++k) {
+		Enemy eaux = my_world.enemies[k];
+		if (eaux.life > 0.f) {
+			eaux.idle_anim->assignTime(time);
+			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+		}
+	}
 	my_world.renderMap(my_world.map, my_world.w, my_world.h,shader_instanced);
 
 	//DRAW UI OR STAGE SPECIFIC ELEMENTS
@@ -385,7 +358,7 @@ void Game::render(void)
 	float aux = (window_width / (float)window_height);
 	renderUI(2, textures[99], aux);
 	//renderUI(4, textures[97], aux);
-	renderMinimap(textures[96]);
+	renderMinimap(my_world.minimap);
 	///////////////////////////////////////// sangre vida
 	//renderUI(0, textures[98]);
 	///////////////////////////////////////////
@@ -394,14 +367,30 @@ void Game::render(void)
 	SDL_GL_SwapWindow(this->window);
 }
 
+int checkDif() {
+
+	Player player = Game::instance->my_world.player;
+	Vector3 a = Vector3(sin(player.angle * RAD2DEG), 1 , cos(player.angle * RAD2DEG));
+	Vector3 b = Vector3(sin(player.moveAngle), 1, cos(player.moveAngle));
+	a = a.normalize();
+	b = b.normalize();
+	//float x = a.cross(b).length();
+	float x = b.cross(a).length();
+	//std::cout << x << '\n'; 
+	if (x > 0) return 1;
+	else return -1;
+}
+
 void Game::update(double seconds_elapsed)
 {
+	Stage::current_stage->update();
+	
+	Player player = my_world.player;
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
-		attack = true;
+		player.attack = true;
 		player.speed = 0.f;
 	}
-
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) {
 		if (free_cam) { Stage::current_stage->changeStage("MenuStage"); inMenu = true; }
@@ -414,70 +403,88 @@ void Game::update(double seconds_elapsed)
 		else Stage::current_stage->changeStage("MenuStage");
 		inMenu = !inMenu;
 	}
-
-	if (!ghost.wasHit && attack && ghost.mesh->testSphereCollision(ghost.model, espada.model.getTranslation(), 0.5, Vector3(), Vector3()) ) {
-		ghost.wasHit = true;
-		ghost.life -= player.light_atk;
-		std::cout << "Ouch!!!\n" ;
+	for (int k = 0; k < my_world.enemies.size(); ++k) {
+		Enemy en = my_world.enemies[k];
+		if (!en.wasHit && player.attack && en.mesh->testSphereCollision(en.model, my_world.espada.model.getTranslation(), 0.5, Vector3(), Vector3())) {
+			my_world.enemies[k].wasHit = true;
+			my_world.enemies[k].life -= player.light_atk;
+		}
 	}
+	
+	if (!free_cam && !inMenu && !player.attack) {
 
-	if (!free_cam && !inMenu && !attack) {
+		Vector3 newPos = Vector3();
+		bool moves = false;
+
+		//Control camera angle
+		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {
+			player.angle += 90 * DEG2RAD * seconds_elapsed;
+		}
+		else if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) {
+			player.angle -= 90 * DEG2RAD * seconds_elapsed;
+		}
+		if (player.angle * RAD2DEG > 360.f) player.angle = (player.angle * RAD2DEG - 360.f) * DEG2RAD;
+		if (player.angle * RAD2DEG < -360.f) player.angle = (player.angle * RAD2DEG + 360.f) * DEG2RAD;
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		Vector3 targetpos = player.pos;
 		Matrix44 R;
-		R.setRotation(player.angle * DEG2RAD, Vector3(0, 1, 0));
-		Vector3 front = R.rotateVector(Vector3(0, 0, -1));
-		Vector3 Right = R.rotateVector(Vector3(1, 0, -0));
-
+		Vector3 front = R.rotateVector(Vector3(-sin(player.angle), 0, -cos(player.angle)));
+		Vector3 Right = R.rotateVector(Vector3(cos(-player.angle), 0, sin(-player.angle)));
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		Stage::current_stage->update();
-
-		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
-			player.momentum = 1;
-			if (player.speed < player.max_speed) player.speed += 0.07f;
-			targetpos = player.pos + front * player.speed * seconds_elapsed;
-		}
-		else if (Input::isKeyPressed(SDL_SCANCODE_S)) {
-			player.momentum = -1;
-			if (player.speed < player.max_speed) player.speed += 0.07f;
-			targetpos = player.pos - front * player.speed * seconds_elapsed;
-		}
-		else {
-			if (player.speed > 0.f) {
-				//targetpos = player.pos + (front * player.momentum) * player.speed * seconds_elapsed;
-				player.speed -= 0.2f;
-			} 
-		}
-		
-
-
-
 
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
-			player.angle -= 90 * seconds_elapsed;
-		}if (Input::isKeyPressed(SDL_SCANCODE_D)) {
-			player.angle += 90 * seconds_elapsed;
+			if (player.speed < player.max_speed) player.speed += 0.07f;
+			//if (player.moveAngle > -90) player.moveAngle -= 270 * seconds_elapsed;
+			newPos = newPos - (Right * player.speed * seconds_elapsed);
+			moves = true;
 		}
+		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
+			if (player.speed < player.max_speed) player.speed += 0.07f;
+			//if (player.moveAngle < 90) player.moveAngle += 270 * seconds_elapsed;
+			newPos = newPos + (Right * player.speed * seconds_elapsed);
+			moves = true;
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_W)) {
+			player.momentum = 1;
+			//check speed
+			if (player.speed < player.max_speed) player.speed += 0.07f;
+			//check model angle
+			if (player.moveAngle > player.angle * RAD2DEG) player.moveAngle -= checkDif() * 360 * seconds_elapsed;
+			else if (player.moveAngle < player.angle * RAD2DEG) player.moveAngle += checkDif() * 360 * seconds_elapsed;
+			newPos = newPos + (front * player.speed * seconds_elapsed);
+			//targetpos = player.pos + front * player.speed * seconds_elapsed;
+			moves = true;
+		}
+		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
+			player.momentum = -1;
+			if (player.speed < player.max_speed) player.speed += 0.07f;
+			newPos = newPos - (front * player.speed * seconds_elapsed);
+			//targetpos = player.pos - front * player.speed * seconds_elapsed;
+			moves = true;
+		}
+		
+		if (!moves && (player.speed > 0.f)) {
+			player.speed -= 0.2f;
+		} 
+		
+		targetpos = targetpos + newPos;
 
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//COLISIONES	
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+		//GAME COLISIONS
+
 		//calculamos el centro de la esfera de colisión del player elevandola hasta la cintura
 		Vector3 character_center = targetpos + Vector3(0, 0.3, 0);
-
 		bool hascollision = false;
 
 		//para cada objecto de la escena...
-		
 		std::vector<Entity> collidable = my_world.getNearEntities(player.pos.x, -player.pos.z);
 		collidable.insert(collidable.end(), trees.begin(), trees.end());
-		if (ghost.life > 0.f) collidable.push_back(ghost);
+		for(int k = 0 ; k < my_world.enemies.size() ; ++k)
+			if (my_world.enemies[k].life > 0.f) collidable.push_back(my_world.enemies[k]);
 		int size = collidable.size();
 
 		for (int i = 0; i < size; i++) {
@@ -510,25 +517,29 @@ void Game::update(double seconds_elapsed)
 
 		player.model.setIdentity();
 		player.model.setTranslation(player.pos.x, player.pos.y, player.pos.z);
-		player.model.rotate(player.angle * DEG2RAD, Vector3(0, 0.5f, 0));
-
+		player.model.rotate(-player.moveAngle * DEG2RAD, Vector3(0, 0.5f, 0));
 
 		if (Input::isKeyPressed(SDL_SCANCODE_LEFT)) {}
 		if (Input::isKeyPressed(SDL_SCANCODE_RIGHT)) {}
-		
+		/*
 		dog.pos = player.pos - Vector3(0.3f, 0, 0.4f);
 		dog.model = player.model;
 		Vector3 aux = player.model * Vector3(0.3f, 0, 0.4f);
 		dog.setModelPos(aux);
+		*/
 
 		//GET PLAYER POS
 		if (Input::wasKeyPressed(SDL_SCANCODE_C)) {
 			std::cout << "Player pos: " << player.pos.x << ',' << player.pos.y << ',' << player.pos.z << '\n';
 			std::cout << player.speed << '\n';
+			std::cout << "Angle : " << player.angle * RAD2DEG << '\n';
+			std::cout << "Move Angle : " << player.moveAngle  << '\n';
 		}
+
 	}
 	else Stage::current_stage->update();
 	
+	my_world.player = player;
 
 	if (mouse_locked)
 		Input::centerMouse();

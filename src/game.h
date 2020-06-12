@@ -11,11 +11,13 @@
 #include <vector>
 #include "entity.h"
 #include <array>
+#include "world.h"
 class Game
 {
 public:
 	static Game* instance;
 
+	World my_world;
 	std::vector<Entity> tiles;
 	std::vector<Entity> trees;
 	Mesh* meshes[100];

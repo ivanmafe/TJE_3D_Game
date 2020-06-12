@@ -4,6 +4,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "utils.h"
+#include "animation.h"
 #include <string>
 
 
@@ -22,8 +23,14 @@ public:
 	Texture* texture = NULL;
 	Vector3 pos;
 	float angle = 0.f;
-	int momentum = 0;
-	bool wasHit = false;
+
+	//Animations
+	Skeleton* skeleton;
+	Animation* dance_anim;
+	Animation* run_anim;
+	Animation* idle_anim;
+	Animation* attack_anim;
+
 	//playable characteristics
 	float life = 100.f;
 	float max_life = 100.f;
