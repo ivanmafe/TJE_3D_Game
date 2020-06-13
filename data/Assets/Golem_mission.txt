@@ -4,8 +4,16 @@ data/Assets/Textures/GUI/minimap_greenland.png
 0 0
 hero 107.9 -33.85 -90
 tenosuke -1 1 0 0
-4
-golem 20 -26 -90 0
-golem 20 -24 -90 0
-golem 20 -22 -90 0
-golem 20 -28 -90 0
+12
+golem 92 -42 -180 0
+golem 86 -13 -180 0
+golem 57 -15 -180 0
+golem 35 -27 -180 0
+golem 21 -12 -180 0
+golem 17 -47 -180 0
+golem 50 -47 -180 0
+golem 82 -48 -180 0
+golem 98 -61 -180 0
+golem 104 -80 -180 0
+golem 107 -100 -180 0
+golem 88 -100 -180 0

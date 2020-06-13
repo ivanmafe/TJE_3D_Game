@@ -22,6 +22,9 @@
 #include "data.h"
 #include <cmath>
 
+#include <bass.h>
+#include "AudioBass.h"
+
 //shaders
 Shader* shader = NULL;
 Shader* shader_instanced = NULL;
@@ -203,7 +206,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	BASS_Init(-1, 44100, 0, 0, NULL);
 	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav");
-	//theme->PlaySoundAmbient(); 
+	theme->PlaySoundAmbient(); 
 
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");

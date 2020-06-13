@@ -4,8 +4,16 @@ data/Assets/Textures/GUI/minimap_greenland.png
 0 0
 hero 107.9 -33.85 -90
 tenosuke -1 1 0 0
-4
-skeleton 20 -26 -90 0
-skeleton 20 -24 -90 0
-skeleton 20 -22 -90 0
-skeleton 20 -28 -90 0
+12
+skeleton 92 -42 -180 0
+skeleton 86 -13 -180 0
+skeleton 57 -15 -180 0
+skeleton 35 -27 -180 0
+skeleton 21 -12 -180 0
+skeleton 17 -47 -180 0
+skeleton 50 -47 -180 0
+skeleton 82 -48 -180 0
+skeleton 98 -61 -180 0
+skeleton 104 -80 -180 0
+skeleton 107 -100 -180 0
+skeleton 88 -100 -180 0
