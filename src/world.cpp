@@ -118,9 +118,7 @@ void World::generateMap(std::vector<int> map, int w, int h) {
 	
 
 	Game * g = Game::instance;
-	if (k) {
-		std::cout << "";
-	}
+
 	int ind = 0;
 	for (int i = 0; i < h; ++i)
 		for (int j = 0; j < w; ++j) {
@@ -277,7 +275,7 @@ void World::loadScene(char* scene_name) {
 	file >> s; std::cout << "Loading " + s + "\n";
 	file >> x; file >> z; file >> a;
 	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(x, 0, z));
-	player.angle = a; player.moveAngle = a;
+	player.angle = a * DEG2RAD; player.moveAngle = a;
 	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
 	file >> s; std::cout << "Loading " + s + "\n";
 	file >> x; file >> z;
@@ -314,6 +312,14 @@ void World::loadScene(char* scene_name) {
 			aux = *new Enemy("data/Assets/Meshes/golem.mesh", "data/Assets/Textures/golem.png", Vector3(x, 0, z), a, sk, 2);
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/golem_idle.skanim");
+		}
+		else if (!s.compare("boss")) {
+			aux = *new Enemy("data/Assets/Meshes/boss.mesh", "data/Assets/Textures/boss.png", Vector3(x, 0, z), a, sk, 3);
+			aux.weapon_model = Matrix44();
+			aux.weapon_mesh = Mesh::Get("data/Assets/Meshes/espada_boss.obj");
+			aux.weapon_tex = Texture::Get("data/Assets/Textures/espada_boss.png");
+			aux.skeleton = new Skeleton();
+			aux.idle_anim = Animation::Get("data/Assets/animaciones/boss_idle.skanim");
 		}
 		enemies.push_back(aux);
 	}

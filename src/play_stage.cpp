@@ -47,8 +47,18 @@ void PlayStage::update(double seconds_elapsed) {
 		char* s = Stage::stages["SelectStage"]->returnMission();
 		std::cout << s << '\n';
 		player.pos = Vector3(-40, 0, 40);
-		Game::instance->my_world.k = true;
+		
+		Mesh quad;
+		quad.createQuad(0, 0, 2, 2, false);
+		Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
+		shader->enable();
+		shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+		shader->setUniform("u_texture", Game::instance->textures[95]);
+		quad.render(GL_TRIANGLES);
+		shader->disable();
+
 		Game::instance->my_world.loadScene(s);
+		Stage::stages["SelectStage"]->setMission(0);
 		return;
 	}
 
@@ -105,13 +115,19 @@ void PlayStage::update(double seconds_elapsed) {
 
 		if (Input::isKeyPressed(SDL_SCANCODE_A)) {
 			if (player.speed < player.max_speed) player.speed += 0.07f;
-			//if (player.moveAngle > -90) player.moveAngle -= 270 * seconds_elapsed;
+
+			if (player.moveAngle > player.angle * RAD2DEG + 96) player.moveAngle += 270 * seconds_elapsed;
+			else if (player.moveAngle < player.angle * RAD2DEG + 84) player.moveAngle += 270 * seconds_elapsed;
+			
 			newPos = newPos - (Right * player.speed * seconds_elapsed);
 			moves = true;
 		}
 		if (Input::isKeyPressed(SDL_SCANCODE_D)) {
-			if (player.speed < player.max_speed) player.speed += 0.07f;
-			//if (player.moveAngle < 90) player.moveAngle += 270 * seconds_elapsed;
+			if (player.speed < player.max_speed) player.speed += 0.07f;			
+
+			if (player.moveAngle < player.angle * RAD2DEG - 96) player.moveAngle -= 270 * seconds_elapsed;
+			else if (player.moveAngle > player.angle * RAD2DEG - 84) player.moveAngle -= 270 * seconds_elapsed;
+
 			newPos = newPos + (Right * player.speed * seconds_elapsed);
 			moves = true;
 		}
@@ -161,7 +177,6 @@ void PlayStage::update(double seconds_elapsed) {
 			Vector3 v = ent.model.getTranslation();
 			if (ent.mesh == NULL) continue;
 			Mesh* mesh = ent.mesh;
-
 
 			//comprobamos si colisiona el objeto con la esfera (radio 3)
 			Vector3 coll;

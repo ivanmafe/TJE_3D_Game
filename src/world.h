@@ -15,7 +15,7 @@ class World {
 public:
 	int w;
 	int h;
-	bool k = false;
+
 	std::vector<int> map;
 	Texture * minimap;
 	Vector3 exit_point;

@@ -16,6 +16,7 @@ public:
 	virtual void render();
 	virtual void update(double seconds_elapsed);
 	virtual char* returnMission();
+	virtual void setMission(int m);
 };
 
 #endif

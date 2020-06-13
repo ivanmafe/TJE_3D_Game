@@ -106,7 +106,7 @@ void renderMinimap(Texture* tex) {
 	shader2->disable();
 }
 
-void renderUI(int cuadrante, Texture* tex, float relation) {
+void renderUI(int cuadrante, Texture* tex) {
 	
 	glDisable(GL_DEPTH_TEST);
 	Mesh quad;
@@ -188,6 +188,8 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 		meshes[i] = Mesh::Get(const_cast<char*>(s1.c_str()));
 		textures[i] = Texture::Get(const_cast<char*>(s2.c_str()));
 	}
+
+	textures[95] = Texture::Get("data/Assets/Textures/GUI/mapa_con_logo2.png");
 	textures[96] = Texture::Get("data/Assets/Textures/GUI/minimap_pueblo.png");
 	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimap_greenland.png");
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
@@ -294,9 +296,15 @@ void Game::render(void)
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
-			//eaux.idle_anim->assignTime(time);
-			//renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
-			renderMesh(eaux.model, eaux.mesh, eaux.texture);
+			eaux.idle_anim->assignTime(time);
+			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+			//renderMesh(eaux.model, eaux.mesh, eaux.texture);
+			/*if (eaux.weapon_mesh != NULL) {
+				eaux.weapon_model = eaux.skeleton->getBoneMatrix("mixamorig_RightHandIndex2", false);
+				eaux.weapon_model = eaux.weapon_model * eaux.model;
+				renderMesh(eaux.weapon_model, eaux.weapon_mesh, eaux.weapon_tex);
+				my_world.enemies[k].weapon_model = eaux.weapon_model;
+			}*/
 		}
 	}
 	////////////////////////////
@@ -306,11 +314,8 @@ void Game::render(void)
 	Stage::current_stage->render();
 
 	//// DRAW GUI ELEMENTS ////
-	//float aux = (window_width / (float)window_height);
-	//renderUI(2, textures[99], aux);
-	//renderUI(4, textures[97], aux);
-	// sangre vida
-	//renderUI(0, textures[98]);
+	//renderUI(2, textures[99]);
+	//renderUI(0, textures[98]); // sangre vida
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);

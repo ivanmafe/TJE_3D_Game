@@ -8,6 +8,10 @@ class Enemy : public Entity {
 public:
 	Item loot;
 	EnemyType type;
+	Matrix44 weapon_model;
+	Mesh * weapon_mesh = NULL;
+	Texture * weapon_tex = NULL;
+
 	float range = 7.5f;
 	bool wasHit = false;
 	Enemy();

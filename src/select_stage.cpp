@@ -18,6 +18,7 @@ void SelectStage::render() {
 	Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
 	shader->enable();
 	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	if (actual == 0) actual = 1;
 	if (actual == 1) {
 		as = Texture::Get("data/Assets/Textures/GUI/elegir mision1.png");
 	}
@@ -61,6 +62,10 @@ char* SelectStage::returnMission() {
 	else if (actual == 1) return("data/Assets/Skeleton_mission.txt");
 	else if (actual == 2) return("data/Assets/Golem_mission.txt");
 	else if (actual == 3) return("data/Assets/Ork_mission.txt");
-	else if (actual == 4) return("data/Assets/Village.txt");
+	else if (actual == 4) return("data/Assets/Boss_mission.txt");
 	
 }
+
+void SelectStage::setMission(int m) {
+	actual = m;
+};

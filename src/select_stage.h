@@ -12,6 +12,7 @@ public:
 	void render();
 	void update(double seconds_elapsed);
 	char* returnMission();
+	void setMission(int m);
 };
 
 #endif
