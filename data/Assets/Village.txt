@@ -1,6 +1,8 @@
 data/Assets/pueblo.csv
 data/Assets/Textures/GUI/minimap_pueblo.png
-hero 10 -10
+10.2 -20.5
+23.3 -18
+hero 15.5 -22 -87
 tenosuke 17 -29 -60 0.25
 4
 skeleton 20 -26 -90 0

@@ -13,6 +13,7 @@
 #include <array>
 #include "world.h"
 #include <bass.h>
+#include "stage.h"
 #include "AudioBass.h"
 
 class Game
@@ -25,7 +26,7 @@ public:
 	std::vector<Entity> trees;
 	Mesh* meshes[100];
 	Texture* textures[100];
-	std::vector<Matrix44> models[20];
+	std::vector<Matrix44> models[100];
 	
 	//Audio
 	MyAudioBass* theme;

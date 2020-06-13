@@ -1,0 +1,11 @@
+data/Assets/mapa_3d.csv
+data/Assets/Textures/GUI/minimap_greenland.png
+10 -10
+23.3 -18
+hero 114 -32.5 -90
+tenosuke -1 1 0 0
+4
+ork 20 -26 -90 0
+ork 20 -24 -90 0
+ork 20 -22 -90 0
+ork 20 -28 -90 0

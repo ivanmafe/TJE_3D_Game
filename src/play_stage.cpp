@@ -37,6 +37,22 @@ void PlayStage::update(double seconds_elapsed) {
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
+	if (my_world.mission_point.distance(player.pos) < 2) {
+		if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+			Stage::current_stage->changeStage("SelectStage");
+			return;
+		}
+	}
+	else if (my_world.exit_point.distance(player.pos) < 2) {
+		char* s = Stage::stages["SelectStage"]->returnMission();
+		std::cout << s << '\n';
+		player.pos = Vector3(-40, 0, 40);
+		Game::instance->my_world.k = true;
+		Game::instance->my_world.loadScene(s);
+		return;
+	}
+
+
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		player.attack = true;
 		player.speed = 0.f;
@@ -104,8 +120,8 @@ void PlayStage::update(double seconds_elapsed) {
 			//check speed
 			if (player.speed < player.max_speed) player.speed += 0.07f;
 			//check model angle
-			if (player.moveAngle > player.angle * RAD2DEG +2) player.moveAngle -= checkDif() * 360 * seconds_elapsed;
-			else if (player.moveAngle < player.angle * RAD2DEG -2) player.moveAngle += checkDif() * 360 * seconds_elapsed;
+			if (player.moveAngle > player.angle * RAD2DEG + 4) player.moveAngle -= checkDif() * 360 * seconds_elapsed;
+			else if (player.moveAngle < player.angle * RAD2DEG - 4) player.moveAngle += checkDif() * 360 * seconds_elapsed;
 			newPos = newPos + (front * player.speed * seconds_elapsed);
 			//targetpos = player.pos + front * player.speed * seconds_elapsed;
 			moves = true;

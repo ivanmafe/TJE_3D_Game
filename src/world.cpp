@@ -1,6 +1,7 @@
 #include "world.h"
 #include "utils.h"
 #include "game.h"
+#include "data.h"
 
 void chooseModel(Matrix44 * m, int tile, int * index) {
 
@@ -87,16 +88,16 @@ bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 		return 0;
 	}
 
+	while (map.size() != 0) {
+		map.clear();
+	}
+
 	//get map header containing dimensions
 	file >> w;
 	file >> h;
 	int size = w * h;
 
 	//reallocate memory of the map
-	if (map != NULL)
-		free(map);
-	map = (int*)calloc(w * h, sizeof(int));
-
 	int pos = 0;
 	int aux = 0;
 	while (file.good()) {
@@ -106,18 +107,20 @@ bool World::loadMap(std::string filesrc) { //archivo y tamaño de area
 			while (getline(ss, line, ',')) {
 				int aux;
 				std::istringstream(line) >> aux;
-				map[pos++] = aux;
+				map.push_back(aux);
 			}
 		}
 	}
 	return true;
 }
 
-void World::generateMap(int* map, int w, int h) {
+void World::generateMap(std::vector<int> map, int w, int h) {
 	
 
 	Game * g = Game::instance;
-
+	if (k) {
+		std::cout << "";
+	}
 	int ind = 0;
 	for (int i = 0; i < h; ++i)
 		for (int j = 0; j < w; ++j) {
@@ -126,7 +129,11 @@ void World::generateMap(int* map, int w, int h) {
 			int tmp = map[i * w + j];
 			chooseModel(&m, tmp, &ind);
 			Entity e;
-			e.mesh = g->meshes[ind];
+			e.mesh = NULL;
+			if (ind >= 0 && ind <= data_h_size) {
+				std::string s1 = "data/Assets/Meshes/" + mesh_names[ind];
+				e.mesh = Mesh::Get(const_cast<char*>(s1.c_str()));
+			}
 			e.texture = g->textures[ind];
 			e.model = m;
 			//if(poner_cosas que no van al array)
@@ -172,7 +179,7 @@ void World::generateMap(int* map, int w, int h) {
 
 }
 
-void World::renderMap(int* map, int w, int h, Shader* shad) {
+void World::renderMap(std::vector<int> map, int w, int h, Shader* shad) {
 
 	Camera* camera = Camera::current;
 	Game* g = Game::instance;
@@ -185,7 +192,6 @@ void World::renderMap(int* map, int w, int h, Shader* shad) {
 
 	for (int i = 0; i < 20; ++i) {
 		if (g->models[i].size() != 0) {
-
 			shad->setUniform("u_texture", Game::instance->textures[i]);
 			Game::instance->meshes[i]->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
 		}
@@ -223,7 +229,18 @@ std::vector<Entity> World::getNearEntities(float pos_x, float pos_y) {
 }
 
 void World::loadScene(char* scene_name) {
+
 	std::cout << "\nLOADING SCENE!!!\n";
+
+	for (int i = 0; i < 20; ++i) {
+		if (Game::instance->models[i].size() != 0) {
+			for (int m = 0; m < Game::instance->models[i].size(); ++m)
+				Game::instance->models[i][m].clear();
+		}
+	}
+	Game::instance->tiles.clear();
+	Game::instance->trees.clear();
+	this->enemies.clear();
 	
 	std::fstream file;
 	file.open(scene_name, std::fstream::in);
@@ -233,26 +250,34 @@ void World::loadScene(char* scene_name) {
 		return;
 	}
 
+	std::string s;
+	float x, z, sk; int a;
+
 	//LOAD MAP
+	// map file
 	std::string map_name;
 	file >> map_name;
 	std::cout << map_name << '\n';
 	loadMap(map_name);
 	generateMap(map, w, h);
 
+	// minimap
 	file >> map_name;
 	char* cstr = new char[map_name.length() + 1];
 	strcpy(cstr, map_name.c_str());
 	minimap = Texture::Get(cstr);
-
-
-	std::string s;
-	float x, z, sk; int a;
+	// exit point
+	file >> x; file >> z;
+	exit_point = Vector3(x, 0, z);
+	// mission point
+	file >> x; file >> z;
+	mission_point = Vector3(x, 0, z);
 
 	// MAIN CHARACTERS
 	file >> s; std::cout << "Loading " + s + "\n";
-	file >> x; file >> z;
+	file >> x; file >> z; file >> a;
 	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(x, 0, z));
+	player.angle = a; player.moveAngle = a;
 	espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
 	file >> s; std::cout << "Loading " + s + "\n";
 	file >> x; file >> z;
@@ -273,17 +298,23 @@ void World::loadScene(char* scene_name) {
 		file >> s; 
 		file >> x; file >> z;
 		file >> a; file >> sk;
-		std::cout << "SCALE!!!! " << sk << '\n';
 		std::cout << s + " pos: " << x << ',' << z << '\n';
 		Enemy aux;
 		if (!s.compare("skeleton")) {
-			aux = *new Enemy("data/Assets/Meshes/skeleton.mesh", "data/Assets/Textures/skeleton.png", Vector3(x, 0, z), a, sk, -1);
+			aux = *new Enemy("data/Assets/Meshes/skeleton.mesh", "data/Assets/Textures/skeleton.png", Vector3(x, 0, z), a, sk, 0);
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/animations_praying.skanim");
 		}
+		else if (!s.compare("ork")) {
+			aux = *new Enemy("data/Assets/Meshes/ork.mesh", "data/Assets/Textures/ork.png", Vector3(x, 0, z), a, sk, 1);
+			aux.skeleton = new Skeleton();
+			aux.idle_anim = Animation::Get("data/Assets/animaciones/ork_idle.skanim");
+		}
+		else if (!s.compare("golem")) {
+			aux = *new Enemy("data/Assets/Meshes/golem.mesh", "data/Assets/Textures/golem.png", Vector3(x, 0, z), a, sk, 2);
+			aux.skeleton = new Skeleton();
+			aux.idle_anim = Animation::Get("data/Assets/animaciones/golem_idle.skanim");
+		}
 		enemies.push_back(aux);
 	}
-
-
-	
 }

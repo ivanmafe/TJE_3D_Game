@@ -10,8 +10,8 @@
 
 const std::vector<std::string> item_names = {"Pocion de Vida", "Pocion de Stamina"};
 enum  Item { pocionHP, pocionST };
-const std::vector<std::string> enemy_names = { "Esqueleto", "Ogro" , "Golem de Piedra" };
-enum  EnemyType { esqueleto , ogro , golem };
+const std::vector<std::string> enemy_names = { "Esqueleto", "Orco" , "Golem de Piedra" };
+enum  EnemyType { esqueleto , orco , golem };
 
 
 class Entity {

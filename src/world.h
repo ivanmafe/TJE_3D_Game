@@ -15,8 +15,11 @@ class World {
 public:
 	int w;
 	int h;
-	int * map = NULL;
+	bool k = false;
+	std::vector<int> map;
 	Texture * minimap;
+	Vector3 exit_point;
+	Vector3 mission_point;
 
 	Player player;
 	Entity espada;
@@ -26,8 +29,8 @@ public:
 	bool isCellEmpty(float pos_x, float pos_y);
 	bool loadMap(std::string filesrc); 
 
-	void generateMap(int* map, int w, int h);
-	void renderMap(int* map, int w, int h, Shader* shad);
+	void generateMap(std::vector<int> map, int w, int h);
+	void renderMap(std::vector<int> map, int w, int h, Shader* shad);
 	std::vector<Entity> getNearEntities(float pos_x, float pos_y);
 	void loadScene(char* scene_name);
 };

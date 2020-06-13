@@ -14,8 +14,10 @@
 #include "entity_enemy.h"
 #include "world.h"
 #include "stage.h"
+#include "intro_stage.h"
 #include "play_stage.h"
 #include "menu_stage.h"
+#include "select_stage.h"
 #include "debug_stage.h"
 #include "data.h"
 #include <cmath>
@@ -190,6 +192,11 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	textures[97] = Texture::Get("data/Assets/Textures/GUI/minimap_greenland.png");
 	textures[98] = Texture::Get("data/Assets/Textures/GUI/vida_baja.png");
 	textures[99] = Texture::Get("data/Assets/Textures/GUI/vida.png");
+	Texture* t;
+	t = Texture::Get("data/Assets/Textures/GUI/elegir mision1.png");
+	t = Texture::Get("data/Assets/Textures/GUI/elegir mision2.png");
+	t = Texture::Get("data/Assets/Textures/GUI/elegir mision3.png");
+	t = Texture::Get("data/Assets/Textures/GUI/elegir mision4.png");
 
 	BASS_Init(-1, 44100, 0, 0, NULL);
 	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
@@ -197,7 +204,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	//theme->PlaySoundAmbient(); 
 
 	// Load Map
-	my_world.loadScene("data/Assets/scene.txt");
+	my_world.loadScene("data/Assets/Village.txt");
 
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse	
@@ -287,8 +294,9 @@ void Game::render(void)
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
-			eaux.idle_anim->assignTime(time);
-			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+			//eaux.idle_anim->assignTime(time);
+			//renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+			renderMesh(eaux.model, eaux.mesh, eaux.texture);
 		}
 	}
 	////////////////////////////
