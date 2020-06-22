@@ -103,6 +103,8 @@ void PlayStage::update(double seconds_elapsed) {
 		}
 		if (player.angle * RAD2DEG > 360.f) player.angle = (player.angle * RAD2DEG - 360.f) * DEG2RAD;
 		if (player.angle * RAD2DEG < -360.f) player.angle = (player.angle * RAD2DEG + 360.f) * DEG2RAD;
+		if (player.moveAngle > 360.f) player.moveAngle = (player.moveAngle - 360.f);
+		if (player.moveAngle < -360.f) player.moveAngle = (player.moveAngle + 360.f);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

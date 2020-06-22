@@ -22,7 +22,7 @@
 #include "data.h"
 #include <cmath>
 
-#include <bass.h>
+#include "bass.h"
 #include "AudioBass.h"
 
 //shaders
