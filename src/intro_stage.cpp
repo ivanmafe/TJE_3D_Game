@@ -45,8 +45,10 @@ void IntroStage::render() {
 
 void IntroStage::update(double seconds_elapsed) {
 
-	if (Input::wasKeyPressed(SDL_SCANCODE_E))
-		Stage::current_stage->changeStage("PlayStage");
+	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+	actualpos = 0;
+	Stage::current_stage->changeStage("PlayStage");
+	}
 	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if (actualpos > 0)
 			actualpos--;

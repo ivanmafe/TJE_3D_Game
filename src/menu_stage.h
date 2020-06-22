@@ -7,6 +7,7 @@
 class MenuStage : public Stage
 {
 public:
+	int actualpos = 0;
 	MenuStage();
 	void render();
 	void update(double seconds_elapsed);

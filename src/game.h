@@ -44,6 +44,8 @@ public:
 	int fps;
 	bool must_exit;
 
+	bool inpueblo;
+
 	int actualmision;
 
 	//some vars
