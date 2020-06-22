@@ -7,6 +7,7 @@
 class IntroStage : public Stage
 {
 public:
+	int actualpos = 0;
 	IntroStage();
 	void render();
 	void update(double seconds_elapsed);
