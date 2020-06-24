@@ -4,6 +4,7 @@
 #include "world.h"
 #include <bass.h>
 #include "AudioBass.h"
+#include "grender.h"
 
 PlayStage::PlayStage() : Stage("PlayStage") {
 	//empty constructor if needed
@@ -47,16 +48,7 @@ void PlayStage::update(double seconds_elapsed) {
 		char* s = Stage::stages["SelectStage"]->returnMission();
 		std::cout << s << '\n';
 		player.pos = Vector3(-40, 0, 40);
-		
-		Mesh quad;
-		quad.createQuad(0, 0, 2, 2, false);
-		Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
-		shader->enable();
-		shader->setUniform("u_color", Vector4(1, 1, 1, 1));
-		shader->setUniform("u_texture", Game::instance->textures[95]);
-		quad.render(GL_TRIANGLES);
-		shader->disable();
-
+		loadingScreen();
 		Game::instance->my_world.loadScene(s);
 		Stage::stages["SelectStage"]->setMission(0);
 		return;
