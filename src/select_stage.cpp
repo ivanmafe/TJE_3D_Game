@@ -48,10 +48,10 @@ void SelectStage::update(double seconds_elapsed) {
 		Game::instance->actualmision = actual;
 		Stage::current_stage->changeStage("PlayStage");
 	}
-	if (Input::wasKeyPressed(SDL_SCANCODE_UP))
+	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if(actual>1)
 			actual -= 1;
-	if (Input::wasKeyPressed(SDL_SCANCODE_DOWN))
+	if (Input::wasKeyPressed(SDL_SCANCODE_S))
 		if (actual < 4)
 			actual += 1;
 };
