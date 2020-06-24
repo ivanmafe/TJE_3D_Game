@@ -11,11 +11,11 @@ MyAudioBass::~MyAudioBass() {
 
 }
 
-bool MyAudioBass::load(const char* filename)
+bool MyAudioBass::load(const char* filename, bool loop)
 {
 	std::string str = filename;
-	hSample = BASS_SampleLoad(false, filename, 0, 0, 3, 0);
-	
+	if (loop) hSample = BASS_SampleLoad(false, filename, 0, 0, 3, BASS_SAMPLE_LOOP);
+	else hSample = BASS_SampleLoad(false, filename, 0, 0, 3, 0);
 	std::cout << " + Texture loading: " << filename << " ... ";
 
 	this->filename = filename;
@@ -24,14 +24,14 @@ bool MyAudioBass::load(const char* filename)
 	return true;
 }
 
-void initbass() {
+void MyAudioBass::initbass() {
 	if (BASS_Init(-1, 44100, 0, 0, NULL) == false) {
 
 	}
 }
 
 
-MyAudioBass* MyAudioBass::Get(const char* filename)
+MyAudioBass* MyAudioBass::Get(const char* filename, bool loop)
 {
 	assert(filename);
 
@@ -46,36 +46,56 @@ MyAudioBass* MyAudioBass::Get(const char* filename)
 	//load it
 	MyAudioBass* audioBass = new MyAudioBass();
 	
-	if (!audioBass->load(filename))
+	if (!audioBass->load(filename,loop))
 	{
 		delete audioBass;
 		return NULL;
 	}
-	
-	audioBass->setName(filename);
+	audioBass->setName(filename);	
+	audioBass->hSampleChannel = BASS_SampleGetChannel(audioBass->hSample, false);
 	return audioBass;
 }
 
 
+void MyAudioBass::PlaySoundOnce() {
+	if (play) {
+		if (hSample == 0) {
+			std::cout << "file not found" << std::endl;
+			//file not found
+		}
+		hSampleChannel = BASS_SampleGetChannel(hSample, false);
+		//Lanzamos un sample
+		BASS_ChannelPlay(hSampleChannel, true);
+	}
+	else std::cout << "1- OUT!!\N";
+}
 
 
-void MyAudioBass::PlaySoundAmbient() {
+void MyAudioBass::PlaySoundAmbient(const char* filename) {
 
 	//El handler para un sample
-	
 
 	//Cargamos un sample del disco duro (memoria, filename, offset, length, max, flags)
 	//use BASS_SAMPLE_LOOP in the last param to have a looped sound
-	
-	if (hSample == 0){
-		std::cout << "file not found" << std::endl;
-		//file not found
+	if(play){
+		hSample = BASS_SampleLoad(false, filename, 0, 0, 3, BASS_SAMPLE_LOOP);
+		if (hSample == 0) {
+			std::cout << "file not found" << std::endl;
+			//file not found
+		}
+
+		//Creamos un canal para el sample
+		hSampleChannel = BASS_SampleGetChannel(hSample, false);
+
+
+		//Lanzamos un sample
+		BASS_ChannelPlay(hSampleChannel, true);
 	}
+	else std::cout << "2- OUT!!\N";
+}
 
-	//Creamos un canal para el sample
-	hSampleChannel = BASS_SampleGetChannel(hSample, false);
-
-
-	//Lanzamos un sample
-	BASS_ChannelPlay(hSampleChannel, true);
+void MyAudioBass::StopSound() {
+	BASS_Stop();
+	//BASS_ChannelStop(hSampleChannel);
+	BASS_Start();
 }

@@ -46,9 +46,13 @@ void IntroStage::render() {
 void IntroStage::update(double seconds_elapsed) {
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
-	actualpos = 0;
-	Stage::current_stage->changeStage("PlayStage");
+		actualpos = 0;
+		Game::instance->startMenu_theme->StopSound();
+		Stage::current_stage->changeStage("PlayStage");
+		return;
 	}
+	Game::instance->startMenu_theme->PlaySoundOnce();
+
 	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if (actualpos > 0)
 			actualpos--;

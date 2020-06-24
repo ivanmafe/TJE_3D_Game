@@ -34,7 +34,7 @@ int checkDif() {
 }
 
 void PlayStage::update(double seconds_elapsed) {
-
+	Game::instance->theme->PlaySoundOnce();
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
@@ -76,7 +76,7 @@ void PlayStage::update(double seconds_elapsed) {
 		Enemy en = my_world.enemies[k];
 		if (!en.wasHit && player.attack && en.mesh->testSphereCollision(en.model, my_world.espada.model.getTranslation(), 0.5, Vector3(), Vector3())) {
 			my_world.enemies[k].wasHit = true;
-			Game::instance->hit->PlaySoundAmbient();
+			Game::instance->hit->PlaySoundOnce();
 			my_world.enemies[k].life -= player.light_atk;
 		}
 	}
@@ -148,6 +148,7 @@ void PlayStage::update(double seconds_elapsed) {
 			player.speed -= 0.2f;
 		}
 
+		if (player.speed > 0.f) {  Game::instance->step->PlaySoundOnce(); }
 		targetpos = targetpos + newPos;
 
 

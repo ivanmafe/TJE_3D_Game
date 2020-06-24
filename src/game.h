@@ -29,6 +29,10 @@ public:
 	std::vector<Matrix44> models[100];
 	
 	//Audio
+
+	MyAudioBass* startMenu_theme;
+	MyAudioBass* intro_theme;	
+	MyAudioBass* step;
 	MyAudioBass* theme;
 	MyAudioBass* hit;
 

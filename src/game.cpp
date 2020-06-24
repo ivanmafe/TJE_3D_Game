@@ -154,11 +154,13 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision3.png");
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision4.png");
 
-	BASS_Init(-1, 44100, 0, 0, NULL);
-	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav");
-	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav");
-	theme->PlaySoundAmbient(); 
-
+	MyAudioBass::initbass();
+	startMenu_theme = MyAudioBass::Get("data/Assets/Music/start_menu.wav", true);
+	intro_theme = MyAudioBass::Get("data/Assets/Music/intro.wav",true);
+	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav",true);
+	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav",false);
+	step = MyAudioBass::Get("data/Assets/Music/step.mp3",false);
+	
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
 
