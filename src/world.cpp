@@ -301,7 +301,7 @@ void World::loadScene(char* scene_name) {
 		if (!s.compare("skeleton")) {
 			aux = *new Enemy("data/Assets/Meshes/skeleton.mesh", "data/Assets/Textures/skeleton.png", Vector3(x, 0, z), a, sk, 0);
 			aux.skeleton = new Skeleton();
-			aux.idle_anim = Animation::Get("data/Assets/animaciones/animations_praying.skanim");
+			aux.idle_anim = Animation::Get("data/Assets/animaciones/skeleton_idle.skanim");
 		}
 		else if (!s.compare("ork")) {
 			aux = *new Enemy("data/Assets/Meshes/ork.mesh", "data/Assets/Textures/ork.png", Vector3(x, 0, z), a, sk, 1);
