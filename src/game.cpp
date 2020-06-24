@@ -123,9 +123,6 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	glEnable( GL_CULL_FACE ); //render both sides of every triangle
 	glEnable( GL_DEPTH_TEST ); //check the occlusions using the Z buffer
 
-	renderUI(0, Texture::Get("data/Assets/Textures/GUI/mapa_con_logo2.png"));
-	SDL_GL_SwapWindow(this->window);
-
 	//create our camera
 	camera = new Camera();
 	camera->lookAt(Vector3(0.2f,0.6f,-0.5f),Vector3(0.2f,0.f,1.f), Vector3(0.f,1.f,0.f)); //position the camera and point to 0,0,0

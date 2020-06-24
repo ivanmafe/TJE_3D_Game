@@ -57,5 +57,6 @@ void renderUI(int cuadrante, Texture* tex) {
 }
 
 void loadingScreen(){
-	
+	renderUI(0, Texture::Get("data/Assets/Textures/GUI/mapa_con_logo2.png"));
+	SDL_GL_SwapWindow(Game::instance->window);
 }
