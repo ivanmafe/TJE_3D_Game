@@ -262,17 +262,31 @@ void Game::render(void)
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
-			eaux.idle_anim->assignTime(time);
-			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
-			//renderMesh(eaux.model, eaux.mesh, eaux.texture);
-			/*if (eaux.weapon_mesh != NULL) {
-				eaux.weapon_model = eaux.skeleton->getBoneMatrix("mixamorig_RightHandIndex2", false);
-				eaux.weapon_model = eaux.weapon_model * eaux.model;
-				renderMesh(eaux.weapon_model, eaux.weapon_mesh, eaux.weapon_tex);
-				my_world.enemies[k].weapon_model = eaux.weapon_model;
-			}*/
+			if (!eaux.attack && player.pos.distance(eaux.pos) < 2) {
+				eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
+				eaux.attack = true;
+			}
+			if (eaux.attack) { /*Attack*/
+				if (eaux.atk_time == 0.f) eaux.attack_anim->assignTime(0);
+				eaux.atk_time += Game::instance->elapsed_time;
+				eaux.attack_anim->assignTime(eaux.atk_time);
+				blendSkeleton(&eaux.idle_anim->skeleton, &eaux.attack_anim->skeleton, sin(eaux.atk_time * (PI / eaux.attack_anim->duration)), eaux.skeleton);
+				renderAnimated(eaux.model, eaux.mesh, eaux.texture, eaux.skeleton);
+				if (eaux.atk_time >= eaux.attack_anim->duration) {
+					eaux.attack = false;
+					eaux.atk_time = 0;
+					if (player.pos.distance(eaux.pos) < 2){
+						my_world.player.life -= eaux.light_atk;
+					}
+				}
+			}
+			else { /*Idle*/
+				eaux.idle_anim->assignTime(time);
+				renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+			}
 		}
 		else if(eaux.time != -1.f){
+			/*Dying*/
 			if (eaux.time == 0.f) eaux.death_anim->assignTime(0);
 			eaux.time += Game::instance->elapsed_time;
 			eaux.death_anim->assignTime(eaux.time);
@@ -280,18 +294,14 @@ void Game::render(void)
 			if (eaux.time >= eaux.death_anim->duration - 0.2f) {
 				eaux.time = -1.f;
 			}
-			my_world.enemies[k] = eaux;
 		}
+		my_world.enemies[k] = eaux;
 	}
 	////////////////////////////
 
 	my_world.renderMap(my_world.map, my_world.w, my_world.h,shader_instanced);
 	renderMinimap(my_world.minimap);
 	Stage::current_stage->render();
-
-	//// DRAW GUI ELEMENTS ////
-	//renderUI(2, textures[99]);
-	//renderUI(0, textures[98]); // sangre vida
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);

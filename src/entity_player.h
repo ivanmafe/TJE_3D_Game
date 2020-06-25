@@ -11,8 +11,6 @@ public:
 	float speed = 0.f;
 	float max_speed = 5;
 	int momentum = 0;
-	bool attack = false;
-	float atk_time = 0.f;
 	std::vector<Item> inventory[10];
 
 

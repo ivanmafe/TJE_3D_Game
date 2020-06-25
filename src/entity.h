@@ -24,6 +24,8 @@ public:
 	Vector3 pos;
 	float angle = 0.f;
 	float time = 0.f;
+	bool attack = false;
+	float atk_time = 0.f;
 
 	//Animations
 	Skeleton* skeleton;
