@@ -164,7 +164,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	intro_theme = MyAudioBass::Get("data/Assets/Music/intro.wav",true);
 	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav",true);
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav",false);
-	step = MyAudioBass::Get("data/Assets/Music/step.mp3",false);
+	step = MyAudioBass::Get("data/Assets/Music/step.wav",false);
 	
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
