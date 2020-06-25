@@ -7,12 +7,16 @@
 class SelectStage : public Stage
 {
 public:
-	int actual = 1;
+	int actual = 0;
+	int next = 1;
 	SelectStage();
 	void render();
 	void update(double seconds_elapsed);
+	int returnActualVal();
+	int returnNextVal();
 	char* returnMission();
-	void setMission(int m);
+	void setActual(int m);
+	void setNext(int m);
 };
 
 #endif

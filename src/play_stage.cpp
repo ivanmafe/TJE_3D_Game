@@ -34,6 +34,7 @@ int checkDif() {
 }
 
 void PlayStage::update(double seconds_elapsed) {
+
 	Game::instance->theme->PlaySoundOnce();
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
@@ -50,7 +51,14 @@ void PlayStage::update(double seconds_elapsed) {
 		player.pos = Vector3(-40, 0, 40);
 		loadingScreen();
 		Game::instance->my_world.loadScene(s);
-		Stage::stages["SelectStage"]->setMission(0);
+		if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
+			Stage::stages["SelectStage"]->setActual(Stage::stages["SelectStage"]->returnNextVal());
+		}
+		else {
+			Stage::stages["SelectStage"]->setActual(0);
+		}
+
+		Stage::stages["SelectStage"]->setNext(0);
 		return;
 	}
 
@@ -80,7 +88,26 @@ void PlayStage::update(double seconds_elapsed) {
 			my_world.enemies[k].life -= player.light_atk;
 		}
 	}
+	if (my_world.enemies.size() > 0) {
+		bool completed = true;
+		for (int k = 0; k < my_world.enemies.size(); ++k)
+			if (my_world.enemies[k].life > 0.f) completed = false;
 
+		if (completed) {
+			renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
+			SDL_GL_SwapWindow(Game::instance->window);
+			Sleep(5000);
+			if (Stage::max_mission == Stage::stages["SelectStage"]->returnActualVal())
+				Stage::max_mission += 1;
+
+			char* s = Stage::stages["SelectStage"]->returnMission();
+			std::cout << s << '\n';
+			player.pos = Vector3(-40, 0, 40);
+			Game::instance->my_world.loadScene(s);
+			Stage::stages["SelectStage"]->setNext(0);
+			return;
+		}
+	}
 	if (!player.attack) {
 
 		Vector3 newPos = Vector3();

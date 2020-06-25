@@ -34,7 +34,34 @@ void renderMinimap(Texture* tex) {
 	shader2->enable();
 	shader2->setUniform("u_color", Vector4(0, 0, 1, 1));
 	quad2.render(GL_TRIANGLES);
-	shader2->disable();
+
+	World w = Game::instance->my_world;
+	for (int k = 0; k < w.enemies.size(); k++) {
+		if (w.enemies[k].life > 0.f) {
+		
+			Mesh qaux;
+			float x = -((w.enemies[k].pos.z / (Game::instance->my_world.h * 2)));
+			float y = (w.enemies[k].pos.x / -(Game::instance->my_world.h * 2)) + 2;
+
+			x = (x * 0.2f) + 1.5f;
+			y = (y * 0.25f) + 0.05f;
+
+			qaux.vertices.push_back(Vector3(-1 + x, (-0.99f + y), 0));
+			qaux.vertices.push_back(Vector3(-1.01f + x, (-1.01f + y), 0));
+			qaux.vertices.push_back(Vector3(-0.99f + x, (-1.01f + y), 0));
+
+			shader2->enable();
+			shader2->setUniform("u_color", Vector4(1, 0, 0, 1));
+			qaux.render(GL_TRIANGLES);
+			shader2->disable();
+		
+		}
+		
+	}
+
+
+
+
 }
 
 void renderUI(int cuadrante, Texture* tex) {

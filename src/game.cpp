@@ -249,6 +249,7 @@ void Game::render(void)
 	//////////////////////////
 
 	//// DRAW WORLD ENEMIES ////
+
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {

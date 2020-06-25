@@ -13,5 +13,8 @@ Stage::Stage(const char* name) {
 
 void Stage::render() {};
 void Stage::update(double seconds_elapsed) {};
+int Stage::returnActualVal() { return -1; };
+int Stage::returnNextVal() { return -1; };
 char* Stage::returnMission() { return("Stage"); };
-void Stage::setMission(int m) {};
+void Stage::setActual(int m) {};
+void Stage::setNext(int m) {};
