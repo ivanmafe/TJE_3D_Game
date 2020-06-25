@@ -66,8 +66,8 @@ void PlayStage::update(double seconds_elapsed) {
 
 	if (my_world.healing.pos.distance(player.pos) < 2) {
 		if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
-			my_world.player.life = player.max_life;
-
+			Game::instance->my_world.player.life = player.max_life;
+			return;
 		}
 	}
 

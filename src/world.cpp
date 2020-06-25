@@ -294,7 +294,7 @@ void World::loadScene(char* scene_name) {
 	file >> x; file >> z; file >> a;
 	float dmg = player.light_atk;
 
-	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(x, 0, z));
+	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.png", Vector3(x, 0, z));
 	player.light_atk = dmg;
 
 
