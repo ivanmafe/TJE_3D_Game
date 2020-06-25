@@ -1,5 +1,5 @@
-data/Assets/mapa_3d.csv
-data/Assets/Textures/GUI/minimap_greenland.png
+data/Assets/final.csv
+data/Assets/Textures/GUI/final_map.png
 10 -10
 23.3 -18
 hero 114 -32.5 0

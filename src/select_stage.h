@@ -7,6 +7,7 @@
 class SelectStage : public Stage
 {
 public:
+	int max_mission = 1;
 	int actual = 0;
 	int next = 1;
 	SelectStage();
@@ -17,6 +18,8 @@ public:
 	char* returnMission();
 	void setActual(int m);
 	void setNext(int m);
+	void missionUP();
+	int getMaxMission();
 };
 
 #endif

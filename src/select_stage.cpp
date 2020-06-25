@@ -50,9 +50,12 @@ void SelectStage::update(double seconds_elapsed) {
 	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if(next>1)
 			next -= 1;
-	if (Input::wasKeyPressed(SDL_SCANCODE_S))
-		if (next < 4 && max_mission > next)
+	if (Input::wasKeyPressed(SDL_SCANCODE_S)) {
+		int m = this->max_mission;
+		if (next < 4 && m > next)
 			next += 1;
+	}
+	
 };
 
 int SelectStage::returnActualVal() {
@@ -65,11 +68,11 @@ int SelectStage::returnNextVal() {
 
 char* SelectStage::returnMission() {
 	
-	if (next == 0) return("data/Assets/Village.txt");
-	else if (next == 1) return("data/Assets/Skeleton_mission.txt");
-	else if (next == 2) return("data/Assets/Golem_mission.txt");
-	else if (next == 3) return("data/Assets/Ork_mission.txt");
-	else if (next == 4) return("data/Assets/Boss_mission.txt");
+	if (actual == 0) return("data/Assets/Village.txt");
+	else if (actual == 1) return("data/Assets/Skeleton_mission.txt");
+	else if (actual == 2) return("data/Assets/Golem_mission.txt");
+	else if (actual == 3) return("data/Assets/Ork_mission.txt");
+	else if (actual == 4) return("data/Assets/Boss_mission.txt");
 	
 }
 
@@ -80,3 +83,10 @@ void SelectStage::setActual(int m) {
 void SelectStage::setNext(int m) {
 	next = m;
 };
+
+void SelectStage::missionUP() {
+	max_mission++;
+};
+int SelectStage::getMaxMission() {
+	return max_mission;
+}

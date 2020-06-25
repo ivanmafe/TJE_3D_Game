@@ -142,6 +142,8 @@ void World::generateMap(std::vector<int> map, int w, int h) {
 
 	int aux_h = h * 4;
 	int aux_w = w * 4;
+
+	//trees
 	for (int x = 0; x < aux_h; x++)
 		for (int z = 0; z < aux_w; z++) {
 			if ((rand() % 100) < 94) {
@@ -156,14 +158,24 @@ void World::generateMap(std::vector<int> map, int w, int h) {
 				ent.model.setTranslation(x, 0, -z);
 				ent.model.scale(1.5, 1.5, 1.5);
 				g->models[9].push_back(ent.model);
-				ent.mesh = g->meshes[9];
-				ent.texture = g->textures[9];
+				int mission = Stage::stages["SelectStage"]->returnActualVal();
+				if (mission == 0 || mission == 1) {
+					ent.mesh = g->meshes[9];
+					ent.texture = g->textures[9];
+				}
+				else if (mission == 2) {
+					ent.mesh = Mesh::Get("data/Assets/Meshes/arbol seco.obj");
+					ent.texture = Texture::Get("data/Assets/Textures/arbol seco.png");
+				} 
+				else if (mission == 3 || mission == 4) {
+					ent.mesh = Mesh::Get("data/Assets/Meshes/arbol muerto.obj");
+					ent.texture = Texture::Get("data/Assets/Textures/arbol muerto.png");
+				}
 				g->trees.push_back(ent);
 			}
 
 		}
-
-
+	//grass
 	for (int x = 0; x < aux_h; x++)
 		for (int z = 0; z < aux_w; z++) {
 			if ((rand() % 100) < 90) {
@@ -190,8 +202,14 @@ void World::renderMap(std::vector<int> map, int w, int h, Shader* shad) {
 
 	for (int i = 0; i < 20; ++i) {
 		if (g->models[i].size() != 0) {
-			shad->setUniform("u_texture", Game::instance->textures[i]);
-			Game::instance->meshes[i]->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
+			if (i == 9) {
+				shad->setUniform("u_texture", Game::instance->trees[0].texture);
+				Game::instance->trees[0].mesh->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
+			}
+			else {
+				shad->setUniform("u_texture", Game::instance->textures[i]);
+				Game::instance->meshes[i]->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
+			}
 		}
 	}
 

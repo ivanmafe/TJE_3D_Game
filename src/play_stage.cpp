@@ -18,11 +18,8 @@ void PlayStage::render() {
 	camera->center = player.pos + Vector3(0, 0.7, 0);	
 	if (!Stage::stages["SelectStage"]->returnActualVal() == 0) {
 		renderUI(2, Texture::Get("data/Assets/Textures/GUI/vida.png"));
-
-		shader->disable();
 		glDisable(GL_DEPTH_TEST);
 		Mesh quad;
-
 		quad.createQuad(0.5, 0.5, 1, 1, false);
 
 		Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
@@ -63,19 +60,18 @@ void PlayStage::update(double seconds_elapsed) {
 		}
 	}
 	else if (my_world.exit_point.distance(player.pos) < 2) {
-		char* s = Stage::stages["SelectStage"]->returnMission();
-		std::cout << s << '\n';
-		player.pos = Vector3(-40, 0, 40);
-		loadingScreen();
-		Game::instance->my_world.loadScene(s);
 		if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
 			Stage::stages["SelectStage"]->setActual(Stage::stages["SelectStage"]->returnNextVal());
 		}
 		else {
 			Stage::stages["SelectStage"]->setActual(0);
 		}
-
 		Stage::stages["SelectStage"]->setNext(0);
+		char* s = Stage::stages["SelectStage"]->returnMission();
+		std::cout << s << '\n';
+		player.pos = Vector3(-40, 0, 40);
+		loadingScreen();
+		Game::instance->my_world.loadScene(s);
 		return;
 	}
 
@@ -114,14 +110,14 @@ void PlayStage::update(double seconds_elapsed) {
 			renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
 			SDL_GL_SwapWindow(Game::instance->window);
 			Sleep(5000);
-			if (Stage::max_mission == Stage::stages["SelectStage"]->returnActualVal())
-				Stage::max_mission += 1;
-
+			if (Stage::stages["SelectStage"]->getMaxMission() == Stage::stages["SelectStage"]->returnActualVal())
+				Stage::stages["SelectStage"]->missionUP();
+			Stage::stages["SelectStage"]->setActual(0);
+			Stage::stages["SelectStage"]->setNext(0);
 			char* s = Stage::stages["SelectStage"]->returnMission();
 			std::cout << s << '\n';
 			player.pos = Vector3(-40, 0, 40);
 			Game::instance->my_world.loadScene(s);
-			Stage::stages["SelectStage"]->setNext(0);
 			return;
 		}
 	}
