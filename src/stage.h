@@ -20,6 +20,7 @@ public:
 	virtual char* returnMission();
 	virtual void setActual(int m);
 	virtual void setNext(int m);
+	virtual void setMax(int m);
 	virtual void missionUP();
 	virtual int getMaxMission();
 };

@@ -84,6 +84,10 @@ void SelectStage::setNext(int m) {
 	next = m;
 };
 
+void SelectStage::setMax(int m) {
+	max_mission = m;
+};
+
 void SelectStage::missionUP() {
 	max_mission++;
 };
