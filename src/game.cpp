@@ -25,6 +25,7 @@
 
 #include "bass.h"
 #include "AudioBass.h"
+#include "IntrovidStage.h"
 
 //shaders
 Shader* shader = NULL;
@@ -38,6 +39,7 @@ std::map<std::string, Stage*> Stage::stages;
 //World and Execution
 Game* Game::instance = NULL;
 Stage* Stage::current_stage = NULL;
+IntrovidStage vid;
 IntroStage intro;
 PlayStage play;
 DebugStage debug;
