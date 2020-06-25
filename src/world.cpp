@@ -292,7 +292,12 @@ void World::loadScene(char* scene_name) {
 	// MAIN CHARACTERS
 	file >> s; std::cout << "Loading " + s + "\n";
 	file >> x; file >> z; file >> a;
+	float dmg = player.light_atk;
+
 	player = *new Player("data/Assets/Meshes/heroe.mesh", "data/Assets/Textures/hero.tga", Vector3(x, 0, z));
+	player.light_atk = dmg;
+
+
 	player.angle = a * DEG2RAD; player.moveAngle = a;
 	//espada = *new Entity("data/Assets/Meshes/purplesword.obj", "data/Assets/Textures/PurpleSwords.png");
 	file >> s; std::cout << "Loading " + s + "\n";
