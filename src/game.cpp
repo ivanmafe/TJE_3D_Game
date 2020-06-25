@@ -160,9 +160,9 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	t = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
 	MyAudioBass::initbass();
-	startMenu_theme = MyAudioBass::Get("data/Assets/Music/start_menu.wav", true);
-	intro_theme = MyAudioBass::Get("data/Assets/Music/intro.wav",true);
-	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.wav",true);
+	startMenu_theme = MyAudioBass::Get("data/Assets/Music/start_menu.mp3", true);
+	intro_theme = MyAudioBass::Get("data/Assets/Music/intro.mp3",true);
+	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.mp3",true);
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav",false);
 	step = MyAudioBass::Get("data/Assets/Music/step.wav",false);
 	
