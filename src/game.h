@@ -26,6 +26,8 @@ public:
 	std::vector<Entity> trees;
 	Mesh* meshes[100];
 	Texture* textures[100];
+	Texture* textures_seco[100];
+	Texture* textures_piedra[100];
 	std::vector<Matrix44> models[100];
 	
 	//Audio

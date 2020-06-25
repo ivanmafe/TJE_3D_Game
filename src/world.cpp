@@ -132,7 +132,13 @@ void World::generateMap(std::vector<int> map, int w, int h) {
 				std::string s1 = "data/Assets/Meshes/" + mesh_names[ind];
 				e.mesh = Mesh::Get(const_cast<char*>(s1.c_str()));
 			}
-			e.texture = g->textures[ind];
+			int val = Stage::stages["SelectStage"]->returnNextVal();
+			if(val == 0 || val == 1)
+				e.texture = g->textures[ind];
+			else if (val == 2)
+				e.texture = g->textures_seco[ind];
+			else
+				e.texture = g->textures_piedra[ind];
 			e.model = m;
 			//if(poner_cosas que no van al array)
 			g->tiles.push_back(e);
@@ -207,7 +213,14 @@ void World::renderMap(std::vector<int> map, int w, int h, Shader* shad) {
 				Game::instance->trees[0].mesh->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
 			}
 			else {
-				shad->setUniform("u_texture", Game::instance->textures[i]);
+				int val = Stage::stages["SelectStage"]->returnActualVal();
+				if (val == 0 || val == 1)
+					shad->setUniform("u_texture", Game::instance->textures[i]);
+				else if (val == 2)
+					shad->setUniform("u_texture", Game::instance->textures_seco[i]);
+				else
+					shad->setUniform("u_texture", Game::instance->textures_piedra[i]);
+				//shad->setUniform("u_texture", Game::instance->textures[i]);
 				Game::instance->meshes[i]->renderInstanced(GL_TRIANGLES, &g->models[i][0], g->models[i].size());
 			}
 		}
