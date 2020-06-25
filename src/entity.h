@@ -23,6 +23,7 @@ public:
 	Texture* texture = NULL;
 	Vector3 pos;
 	float angle = 0.f;
+	float time = 0.f;
 
 	//Animations
 	Skeleton* skeleton;
@@ -30,6 +31,7 @@ public:
 	Animation* run_anim;
 	Animation* idle_anim;
 	Animation* attack_anim;
+	Animation* death_anim;
 
 	//playable characteristics
 	float life = 100.f;

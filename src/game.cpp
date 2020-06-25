@@ -270,6 +270,16 @@ void Game::render(void)
 				my_world.enemies[k].weapon_model = eaux.weapon_model;
 			}*/
 		}
+		else if(eaux.time != -1.f){
+			if (eaux.time == 0.f) eaux.death_anim->assignTime(0);
+			eaux.time += Game::instance->elapsed_time;
+			eaux.death_anim->assignTime(eaux.time);
+			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.death_anim->skeleton);
+			if (eaux.time >= eaux.death_anim->duration - 0.2f) {
+				eaux.time = -1.f;
+			}
+			my_world.enemies[k] = eaux;
+		}
 	}
 	////////////////////////////
 
