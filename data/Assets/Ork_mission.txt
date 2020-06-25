@@ -4,5 +4,6 @@ data/Assets/Textures/GUI/roca.png
 0 0
 hero 105.2 -89.64 -180
 tenosuke -1 1 0 0
-1
+2
 ork 95.3 -90.3 -180 0
+ork 95.3 -92.3 -180 0

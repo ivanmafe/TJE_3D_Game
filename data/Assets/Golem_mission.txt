@@ -4,5 +4,6 @@ data/Assets/Textures/GUI/naranja.png
 0 0
 hero 109 -62 -90
 tenosuke -1 1 0 0
-1
+2
 golem 98 -61 -180 0
+golem 100 -61 -180 0

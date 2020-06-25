@@ -320,16 +320,25 @@ void World::loadScene(char* scene_name) {
 			aux = *new Enemy("data/Assets/Meshes/skeleton.mesh", "data/Assets/Textures/skeleton.png", Vector3(x, 0, z), a, sk, 0);
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/skeleton_idle.skanim");
+			aux.run_anim = Animation::Get("data/Assets/animaciones/skeleton_walking.skanim");
+			aux.attack_anim = Animation::Get("data/Assets/animaciones/skeleton_atack1.skanim");
+			aux.death_anim = Animation::Get("data/Assets/animaciones/skeleton_dying.skanim");
 		}
 		else if (!s.compare("ork")) {
 			aux = *new Enemy("data/Assets/Meshes/ork.mesh", "data/Assets/Textures/ork.png", Vector3(x, 0, z), a, sk, 1);
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/ork_idle.skanim");
+			aux.run_anim = Animation::Get("data/Assets/animaciones/ork_walking.skanim");
+			aux.attack_anim = Animation::Get("data/Assets/animaciones/ork_atack1.skanim");
+			aux.death_anim = Animation::Get("data/Assets/animaciones/ork_dying.skanim");
 		}
 		else if (!s.compare("golem")) {
 			aux = *new Enemy("data/Assets/Meshes/golem.mesh", "data/Assets/Textures/golem.png", Vector3(x, 0, z), a, sk, 2);
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/golem_idle.skanim");
+			aux.run_anim = Animation::Get("data/Assets/animaciones/golem_walking.skanim");
+			aux.attack_anim = Animation::Get("data/Assets/animaciones/golem_atack1.skanim");
+			aux.death_anim = Animation::Get("data/Assets/animaciones/golem_dying.skanim");
 		}
 		else if (!s.compare("boss")) {
 			aux = *new Enemy("data/Assets/Meshes/boss.mesh", "data/Assets/Textures/boss.png", Vector3(x, 0, z), a, sk, 3);
@@ -338,6 +347,9 @@ void World::loadScene(char* scene_name) {
 			aux.weapon_tex = Texture::Get("data/Assets/Textures/espada_boss.png");
 			aux.skeleton = new Skeleton();
 			aux.idle_anim = Animation::Get("data/Assets/animaciones/boss_idle.skanim");
+			aux.run_anim = Animation::Get("data/Assets/animaciones/boss_walking.skanim");
+			aux.attack_anim = Animation::Get("data/Assets/animaciones/boss_atack1.skanim");
+			aux.death_anim = Animation::Get("data/Assets/animaciones/boss_dying.skanim");
 		}
 		enemies.push_back(aux);
 	}

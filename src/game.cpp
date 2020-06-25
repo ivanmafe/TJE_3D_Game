@@ -249,7 +249,6 @@ void Game::render(void)
 	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
 	Texture* floor_tex;
 	int mission = Stage::stages["SelectStage"]->returnActualVal();
-	std::cout << mission << '\n';
 	if (mission == 0 || mission == 1) floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	else if (mission == 2) floor_tex = Texture::Get("data/Assets/Textures/orange_plane.png");
 	else if (mission == 3 || mission == 4) floor_tex = Texture::Get("data/Assets/Textures/gray_plane.png");
@@ -270,6 +269,16 @@ void Game::render(void)
 				renderMesh(eaux.weapon_model, eaux.weapon_mesh, eaux.weapon_tex);
 				my_world.enemies[k].weapon_model = eaux.weapon_model;
 			}*/
+		}
+		else if(eaux.time != -1.f){
+			if (eaux.time == 0.f) eaux.death_anim->assignTime(0);
+			eaux.time += Game::instance->elapsed_time;
+			eaux.death_anim->assignTime(eaux.time);
+			renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.death_anim->skeleton);
+			if (eaux.time >= eaux.death_anim->duration - 0.2f) {
+				eaux.time = -1.f;
+			}
+			my_world.enemies[k] = eaux;
 		}
 	}
 	////////////////////////////
