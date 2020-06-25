@@ -107,6 +107,17 @@ void PlayStage::update(double seconds_elapsed) {
 			if (my_world.enemies[k].life > 0.f) completed = false;
 
 		if (completed) {
+
+			if (Stage::stages["SelectStage"]->returnActualVal() == 4) {
+				//FINAL DEL JUEGO
+				renderUI(0, Texture::Get("data/Assets/Textures/GUI/final.png"));
+				SDL_GL_SwapWindow(Game::instance->window);
+				Sleep(15000);
+				Stage::stages["SelectStage"]->setActual(0);
+				Stage::stages["SelectStage"]->setNext(0);
+				Stage::changeStage("IntroStage");
+				return;
+			}
 			renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
 			SDL_GL_SwapWindow(Game::instance->window);
 			Sleep(5000);
@@ -115,7 +126,6 @@ void PlayStage::update(double seconds_elapsed) {
 			Stage::stages["SelectStage"]->setActual(0);
 			Stage::stages["SelectStage"]->setNext(0);
 			char* s = Stage::stages["SelectStage"]->returnMission();
-			std::cout << s << '\n';
 			player.pos = Vector3(-40, 0, 40);
 			Game::instance->my_world.loadScene(s);
 			return;
