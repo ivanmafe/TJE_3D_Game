@@ -16,6 +16,23 @@ void PlayStage::render() {
 	Camera *camera = Game::instance->camera->current;
 	camera->eye = Vector3(player.pos.x + sin(player.angle), 1.25, player.pos.z + cos(player.angle));
 	camera->center = player.pos + Vector3(0, 0.7, 0);	
+	if (!Stage::stages["SelectStage"]->returnActualVal() == 0) {
+		renderUI(2, Texture::Get("data/Assets/Textures/GUI/vida.png"));
+
+		shader->disable();
+		glDisable(GL_DEPTH_TEST);
+		Mesh quad;
+
+		quad.createQuad(0.5, 0.5, 1, 1, false);
+
+		Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
+		shader->enable();
+		shader->setUniform("u_color", Vector4(1, 0, 0, 1));
+		quad.render(GL_TRIANGLES);
+		shader->disable();
+
+	}
+
 
 };
 

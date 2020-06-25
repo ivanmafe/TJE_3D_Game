@@ -155,6 +155,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision2.png");
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision3.png");
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision4.png");
+	t = Texture::Get("data/Assets/Textures/GUI/vida.png");
 
 	MyAudioBass::initbass();
 	startMenu_theme = MyAudioBass::Get("data/Assets/Music/start_menu.wav", true);

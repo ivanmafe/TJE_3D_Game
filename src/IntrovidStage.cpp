@@ -2,6 +2,7 @@
 #include "game.h"
 #include "world.h"
 #include "input.h"
+#include "grender.h"
 
 
 IntrovidStage::IntrovidStage() : Stage("IntrovidStage") {
@@ -32,9 +33,6 @@ void IntrovidStage::render() {
     if (actualpos == 2) {
         shader->setUniform("u_texture", as1);
     }
-    if (actualpos == 3) {
-        Stage::current_stage->changeStage("IntroStage");
-    }
 
     quad.render(GL_TRIANGLES);
     shader->disable();
@@ -52,6 +50,12 @@ void IntrovidStage::update(double seconds_elapsed) {
     //if((((int)time)%4)==0)
         //actualpos++;
 
-    if (Input::wasKeyPressed(SDL_SCANCODE_E))
+    if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
         actualpos++;
+
+        if (actualpos == 3) {
+            loadingScreen();
+            Stage::current_stage->changeStage("IntroStage");
+        }
+    }
 };

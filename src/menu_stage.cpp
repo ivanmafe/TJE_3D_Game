@@ -23,7 +23,7 @@ void MenuStage::render() {
 	Texture* as2 = Texture::Get("data/Assets/Textures/GUI/pausa-sel2.png");
 	Texture* as3 = Texture::Get("data/Assets/Textures/GUI/pausa-sel3.png");
 
-	if (Game::instance->inpueblo == true) {
+	if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
 		shader->setUniform("u_texture", as0);
 	}
 	else {
