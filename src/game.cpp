@@ -143,8 +143,12 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	for (int i = 0; i < data_h_size + 1; ++i) {
 		std::string s1 = "data/Assets/Meshes/" + mesh_names[i];
 		std::string s2 = "data/Assets/Textures/" + texture_names[i];
+		std::string s3 = "data/Assets/Textures/texturas-seco/" + texture_names[i];
+		std::string s4 = "data/Assets/Textures/texturas_montana/" + texture_names[i];
 		meshes[i] = Mesh::Get(const_cast<char*>(s1.c_str()));
 		textures[i] = Texture::Get(const_cast<char*>(s2.c_str()));
+		textures_seco[i] = Texture::Get(const_cast<char*>(s3.c_str()));
+		textures_piedra[i] = Texture::Get(const_cast<char*>(s4.c_str()));
 	}
 
 	textures[95] = Texture::Get("data/Assets/Textures/GUI/mapa_con_logo2.png");
@@ -265,7 +269,7 @@ void Game::render(void)
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
 			if (!eaux.attack && player.pos.distance(eaux.pos) < 2) {
-				eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
+				//eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
 				eaux.attack = true;
 			}
 			if (eaux.attack) { /*Attack*/
