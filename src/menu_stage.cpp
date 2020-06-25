@@ -58,6 +58,34 @@ void MenuStage::update(double seconds_elapsed) {
 		Stage::current_stage->changeStage("PlayStage");
 	}
 
+	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+		if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
+			if (actualpos == 0) {
+				actualpos = 0;
+				Stage::current_stage->changeStage("PlayStage");
+			}
+			if (actualpos == 1) {
+				actualpos = 0;
+				Stage::current_stage->changeStage("IntroStage");
+			}
+		}
+		else {
+			if (actualpos == 0) {
+				actualpos = 0;
+				Stage::current_stage->changeStage("PlayStage");
+			}
+			if (actualpos == 1) {
+				actualpos = 0;
+				Stage::current_stage->changeStage("PlayStage");
+			}
+			if (actualpos == 2) {
+				actualpos = 0;
+				Stage::current_stage->changeStage("IntroStage");
+			}
+		}
+	}
+
+
 	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if (actualpos > 0)
 			actualpos--;

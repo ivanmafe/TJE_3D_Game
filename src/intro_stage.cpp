@@ -45,13 +45,30 @@ void IntroStage::render() {
 
 void IntroStage::update(double seconds_elapsed) {
 
-	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
-		actualpos = 0;
-		Game::instance->startMenu_theme->StopSound();
-		Stage::current_stage->changeStage("PlayStage");
-		return;
-	}
+	
 	Game::instance->startMenu_theme->PlaySoundOnce();
+
+
+	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+		if (actualpos == 0) {
+			actualpos = 0;
+			Game::instance->startMenu_theme->StopSound();
+			Stage::current_stage->changeStage("PlayStage");
+		}
+		if (actualpos == 1) {
+			actualpos = 0;
+			Game::instance->startMenu_theme->StopSound();
+			Stage::current_stage->changeStage("PlayStage");
+		}
+		if (actualpos == 2) {
+			actualpos = 0;
+			Game::instance->startMenu_theme->StopSound();
+			Stage::current_stage->changeStage("IntroStage");
+		}
+		if (actualpos == 3) {
+			Game::instance->must_exit=true;
+		}
+	}
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_W))
 		if (actualpos > 0)
