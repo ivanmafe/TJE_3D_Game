@@ -265,7 +265,7 @@ void Game::render(void)
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
 			if (!eaux.attack && player.pos.distance(eaux.pos) < 2) {
-				eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
+				//eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
 				eaux.attack = true;
 			}
 			if (eaux.attack) { /*Attack*/

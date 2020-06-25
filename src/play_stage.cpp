@@ -53,6 +53,17 @@ void PlayStage::update(double seconds_elapsed) {
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
+	if (player.life <= 0.f) {
+		renderUI(0, Texture::Get("data/Assets/Textures/GUI/vida_baja.png"));
+		SDL_GL_SwapWindow(Game::instance->window);
+		Sleep(7500);
+		Stage::stages["SelectStage"]->setActual(0);
+		Stage::stages["SelectStage"]->setNext(1);
+		char* s = Stage::stages["SelectStage"]->returnMission();
+		player.pos = Vector3(-40, 0, 40);
+		Game::instance->my_world.loadScene(s);
+		return;
+	}
 
 
 	if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
