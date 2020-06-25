@@ -26,6 +26,7 @@
 #include "bass.h"
 #include "AudioBass.h"
 #include "IntrovidStage.h"
+#include "tienda_stage.h"
 
 //shaders
 Shader* shader = NULL;
@@ -41,6 +42,7 @@ Game* Game::instance = NULL;
 Stage* Stage::current_stage = NULL;
 IntrovidStage vid;
 IntroStage intro;
+TiendaStage tienda;
 PlayStage play;
 DebugStage debug;
 MenuStage menu;
@@ -166,7 +168,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
-
+	my_world.espada = *new Entity("data/Assets/Meshes/basicsword.obj", "data/Assets/Textures/swordtexturelight.png");
 	//hide the cursor
 	SDL_ShowCursor(!mouse_locked); //hide or show the mouse	
 }

@@ -17,16 +17,16 @@ void PlayStage::render() {
 	camera->eye = Vector3(player.pos.x + sin(player.angle), 1.25, player.pos.z + cos(player.angle));
 	camera->center = player.pos + Vector3(0, 0.7, 0);	
 	if (!Stage::stages["SelectStage"]->returnActualVal() == 0) {
+		Shader* shader2 = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");
+		Mesh qaux;
+		float dist = (1 - (player.life / player.max_life));
+		qaux.createQuad(-0.57 - dist / 4, 0.939f, 0.57 - dist / 2, 0.08, false);
+		shader2->enable();
+		shader2->setUniform("u_color", Vector4(1, 0, 0, 1));
+		shader2->setUniform("u_texture", Texture::Get("data/Assets/Textures/GUI/vida_baja.png"));
+		qaux.render(GL_TRIANGLES);
+		shader2->disable();
 		renderUI(2, Texture::Get("data/Assets/Textures/GUI/vida.png"));
-		glDisable(GL_DEPTH_TEST);
-		Mesh quad;
-		quad.createQuad(0.5, 0.5, 1, 1, false);
-
-		Shader* shader = Shader::Get("data/shaders/quad.vs", "data/shaders/GUI.fs");//flat.fs");
-		shader->enable();
-		shader->setUniform("u_color", Vector4(1, 0, 0, 1));
-		quad.render(GL_TRIANGLES);
-		shader->disable();
 
 	}
 
@@ -52,6 +52,20 @@ void PlayStage::update(double seconds_elapsed) {
 	Game::instance->theme->PlaySoundOnce();
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
+
+
+
+	if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
+		if (player.pos.distance(my_world.tenosuke.pos)<1) {
+			if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
+				loadingScreen();
+				Stage::current_stage->changeStage("TiendaStage");
+			}
+		}
+	}
+
+
+
 
 	if (my_world.mission_point.distance(player.pos) < 2) {
 		if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
@@ -79,12 +93,17 @@ void PlayStage::update(double seconds_elapsed) {
 		player.attack = true;
 		player.speed = 0.f;
 	}
-
+	if (Input::wasKeyPressed(SDL_SCANCODE_O)) {
+		player.life -= 10;
+	}
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) 
 		Stage::current_stage->changeStage("DebugStage"); 
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_M))
 		Stage::current_stage->changeStage("MenuStage");
+
+	if (Input::wasKeyPressed(SDL_SCANCODE_P))
+		Stage::current_stage->changeStage("TiendaStage");
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_I))
 		Stage::current_stage->changeStage("IntroStage");
