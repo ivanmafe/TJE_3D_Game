@@ -249,7 +249,6 @@ void Game::render(void)
 	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
 	Texture* floor_tex;
 	int mission = Stage::stages["SelectStage"]->returnActualVal();
-	std::cout << mission << '\n';
 	if (mission == 0 || mission == 1) floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	else if (mission == 2) floor_tex = Texture::Get("data/Assets/Textures/orange_plane.png");
 	else if (mission == 3 || mission == 4) floor_tex = Texture::Get("data/Assets/Textures/gray_plane.png");

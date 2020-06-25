@@ -68,7 +68,6 @@ void PlayStage::update(double seconds_elapsed) {
 		}
 		Stage::stages["SelectStage"]->setNext(0);
 		char* s = Stage::stages["SelectStage"]->returnMission();
-		std::cout << s << '\n';
 		player.pos = Vector3(-40, 0, 40);
 		loadingScreen();
 		Game::instance->my_world.loadScene(s);
@@ -114,21 +113,26 @@ void PlayStage::update(double seconds_elapsed) {
 				SDL_GL_SwapWindow(Game::instance->window);
 				Sleep(15000);
 				Stage::stages["SelectStage"]->setActual(0);
-				Stage::stages["SelectStage"]->setNext(0);
+				Stage::stages["SelectStage"]->setNext(1);
+				char* s = Stage::stages["SelectStage"]->returnMission();
+				player.pos = Vector3(-40, 0, 40);
+				Game::instance->my_world.loadScene(s);
 				Stage::changeStage("IntroStage");
 				return;
 			}
-			renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
-			SDL_GL_SwapWindow(Game::instance->window);
-			Sleep(5000);
-			if (Stage::stages["SelectStage"]->getMaxMission() == Stage::stages["SelectStage"]->returnActualVal())
-				Stage::stages["SelectStage"]->missionUP();
-			Stage::stages["SelectStage"]->setActual(0);
-			Stage::stages["SelectStage"]->setNext(0);
-			char* s = Stage::stages["SelectStage"]->returnMission();
-			player.pos = Vector3(-40, 0, 40);
-			Game::instance->my_world.loadScene(s);
-			return;
+			else {
+				renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
+				SDL_GL_SwapWindow(Game::instance->window);
+				Sleep(5000);
+				if (Stage::stages["SelectStage"]->getMaxMission() == Stage::stages["SelectStage"]->returnActualVal())
+					Stage::stages["SelectStage"]->missionUP();
+				Stage::stages["SelectStage"]->setActual(0);
+				Stage::stages["SelectStage"]->setNext(0);
+				char* s = Stage::stages["SelectStage"]->returnMission();
+				player.pos = Vector3(-40, 0, 40);
+				Game::instance->my_world.loadScene(s);
+				return;
+			}
 		}
 	}
 	if (!player.attack) {
