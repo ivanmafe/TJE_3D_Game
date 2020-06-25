@@ -4,5 +4,6 @@ data/Assets/Textures/GUI/final_map.png
 0 0
 hero 48 -48 0
 tenosuke -1 1 0 0
+healing 8 -42
 1
 boss 20 -26 -90 0
