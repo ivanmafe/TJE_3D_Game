@@ -66,6 +66,11 @@ void MenuStage::update(double seconds_elapsed) {
 			}
 			if (actualpos == 1) {
 				actualpos = 0;
+				Game::instance->my_world.SaveGame();
+				Stage::current_stage->changeStage("PlayStage");
+			}
+			if (actualpos == 2) {
+				actualpos = 0;
 				Stage::current_stage->changeStage("IntroStage");
 			}
 		}
@@ -90,13 +95,8 @@ void MenuStage::update(double seconds_elapsed) {
 		if (actualpos > 0)
 			actualpos--;
 	if (Input::wasKeyPressed(SDL_SCANCODE_S))
-		if (Game::instance->inpueblo == true) {
-			if (actualpos < 1)
-				actualpos++;
-		}
-		else {
-			if (actualpos < 2)
-				actualpos++;
-		}
+		if (actualpos < 2)
+			actualpos++;
+	
 };
 

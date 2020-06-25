@@ -18,6 +18,7 @@ public:
 	char* returnMission();
 	void setActual(int m);
 	void setNext(int m);
+	void setMax(int m);
 	void missionUP();
 	int getMaxMission();
 };

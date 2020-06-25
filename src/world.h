@@ -34,6 +34,8 @@ public:
 	void renderMap(std::vector<int> map, int w, int h, Shader* shad);
 	std::vector<Entity> getNearEntities(float pos_x, float pos_y);
 	void loadScene(char* scene_name);
+	void SaveGame();
+	bool LoadGame();
 };
 
 #endif

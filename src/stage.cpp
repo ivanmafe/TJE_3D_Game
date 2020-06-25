@@ -18,6 +18,7 @@ int Stage::returnNextVal() { return -1; };
 char* Stage::returnMission() { return("Stage"); };
 void Stage::setActual(int m) {};
 void Stage::setNext(int m) {};
+void Stage::setMax(int m) {};
 void Stage::missionUP() {
 	max_mission++;
 };

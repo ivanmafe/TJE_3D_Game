@@ -375,3 +375,36 @@ void World::loadScene(char* scene_name) {
 		enemies.push_back(aux);
 	}
 }
+
+void World::SaveGame() {
+
+	FILE* f;
+	f = fopen("data/save_log.txt", "wb");
+	if (f) {
+		fwrite(&player, sizeof(Player), 1, f);
+		fwrite(&espada, sizeof(Entity), 1, f);
+		int x = Stage::stages["SelectStage"]->getMaxMission();
+		fwrite(&x, sizeof(int), 1, f);
+		int y = Stage::stages["SelectStage"]->returnNextVal();
+		fwrite(&y, sizeof(int), 1, f);
+	}
+}
+
+bool World::LoadGame() {
+
+	FILE* f;
+	f = fopen("data/save_log.txt", "r");
+	if (f) {
+		fread(&player, sizeof(Player), 1, f);
+		fread(&espada, sizeof(int), 1, f);
+		int x = 0;
+		fread(&x, sizeof(int), 1, f);
+		Stage::stages["SelectStage"]->setMax(x);
+		fread(&x, sizeof(int), 1, f);
+		Stage::stages["SelectStage"]->setNext(x);
+		return true;
+	}
+	else return false;
+
+
+}
