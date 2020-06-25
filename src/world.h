@@ -24,6 +24,7 @@ public:
 	Player player;
 	Entity espada;
 	Entity tenosuke;
+	Entity healing;
 	std::vector<Enemy> enemies;
 
 	bool isCellEmpty(float pos_x, float pos_y);

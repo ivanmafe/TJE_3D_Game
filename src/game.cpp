@@ -242,6 +242,8 @@ void Game::render(void)
 	//// DRAW STORE CHARACTER ////
 	my_world.tenosuke.dance_anim->assignTime(time);
 	renderAnimated(my_world.tenosuke.model, meshes[10], textures[10], &my_world.tenosuke.dance_anim->skeleton);
+	renderMesh(my_world.healing.model, Mesh::Get("data/Assets/Meshes/arbusto.obj"), Texture::Get("data/Assets/Textures/arbusto.png"));
+
 	//////////////////////////////
 	
 	//// DRAW WORLD FLOOR ////

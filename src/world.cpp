@@ -305,6 +305,9 @@ void World::loadScene(char* scene_name) {
 	file >> a; file >> sk;
 	tenosuke = *new Entity(Vector3(x, 0, z), a, sk);
 
+	file >> s; file >> x; file >> z;
+	healing = *new Entity(Vector3(x, 0, z), 0, 1);
+
 	// Load Animations
 	player.skeleton = new Skeleton();
 	tenosuke.dance_anim = Animation::Get("data/Assets/animaciones/tenosuke_idle.skanim");
