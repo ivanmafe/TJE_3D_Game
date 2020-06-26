@@ -6,4 +6,4 @@ hero 32.2 -16.64 92
 tenosuke -1 1 0 0
 healing 19 -12
 1
-skeleton 14.3 -27.3 90 0
+skeleton 14.3 -27.3 90 0 15

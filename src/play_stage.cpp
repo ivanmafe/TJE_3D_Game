@@ -152,6 +152,10 @@ void PlayStage::update(double seconds_elapsed) {
 		player.attack = true;
 		player.speed = 0.f;
 	}
+
+	if (Input::wasKeyPressed(SDL_SCANCODE_M))
+		Stage::current_stage->changeStage("MenuStage");
+
 	/// CHEAT MODE ///
 	/*
 	if (Input::wasKeyPressed(SDL_SCANCODE_O)) {
@@ -162,9 +166,6 @@ void PlayStage::update(double seconds_elapsed) {
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) 
 		Stage::current_stage->changeStage("DebugStage"); 
-
-	if (Input::wasKeyPressed(SDL_SCANCODE_M))
-		Stage::current_stage->changeStage("MenuStage");
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_P))
 		Stage::current_stage->changeStage("TiendaStage");
