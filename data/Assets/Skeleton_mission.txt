@@ -5,8 +5,7 @@ data/Assets/Textures/GUI/minimap_greenland.png
 hero 107.9 -33.85 90
 tenosuke -1 1 0 0
 healing 50 -48
-7
-skeleton 104 -80 90 0 30
+6
 skeleton 104 -80 90 0 30
 skeleton 107 -100 90 0 30
 skeleton 81.5 -45 90 0 30
