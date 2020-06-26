@@ -45,10 +45,6 @@ void IntroStage::render() {
 
 void IntroStage::update(double seconds_elapsed) {
 
-	
-	Game::instance->startMenu_theme->PlaySoundOnce();
-
-
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		if (actualpos == 0) {
 			actualpos = 0;

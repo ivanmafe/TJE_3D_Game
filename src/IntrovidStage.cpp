@@ -45,7 +45,7 @@ void IntrovidStage::render() {
 };
 
 void IntrovidStage::update(double seconds_elapsed) {
-
+    Game::instance->startMenu_theme->PlaySoundOnce();
     //time += seconds_elapsed;
     //if((((int)time)%4)==0)
         //actualpos++;
