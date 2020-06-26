@@ -67,8 +67,9 @@ int checkDif() {
 }
 
 void PlayStage::update(double seconds_elapsed) {
-
-	//Game::instance->theme->PlaySoundOnce();
+	if (Stage::stages["SelectStage"]->returnActualVal()==0) {
+		Game::instance->theme->PlaySoundOnce();
+	}
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
@@ -82,6 +83,8 @@ void PlayStage::update(double seconds_elapsed) {
 		char* s = Stage::stages["SelectStage"]->returnMission();
 		player.pos = Vector3(-40, 0, 40);
 		Game::instance->my_world.loadScene(s);
+		BASS_Stop();
+		BASS_Start();
 		return;
 	}
 
@@ -202,6 +205,9 @@ void PlayStage::update(double seconds_elapsed) {
 			}
 		}
 		if (completed) {
+
+			BASS_Stop();
+			BASS_Start();
 			if (Stage::stages["SelectStage"]->returnActualVal() == 5) {
 				Stage::stages["SelectStage"]->setActual(0);
 				Stage::stages["SelectStage"]->setNext(1);
