@@ -39,6 +39,12 @@ public:
 	MyAudioBass* hit = NULL;
 	MyAudioBass* final = NULL;
 
+
+	MyAudioBass* verde = NULL;
+	MyAudioBass* naranja = NULL;
+	MyAudioBass* piedra = NULL;
+	MyAudioBass* finalboss = NULL;
+
 	//window
 	SDL_Window* window;
 	int window_width;

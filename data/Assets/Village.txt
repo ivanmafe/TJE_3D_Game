@@ -3,6 +3,6 @@ data/Assets/Textures/GUI/minimap_pueblo.png
 10.2 -20.5
 23.3 -18
 hero 15.5 -22 -87
-tenosuke 17 -29 -60 0.25
+tenosuke 17.3 -29 -60 0.25
 healing -20 20
 0

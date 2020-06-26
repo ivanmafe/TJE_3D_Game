@@ -3,6 +3,7 @@
 #include "game.h"
 #include "world.h"
 #include "utils.h"
+#include "grender.h"
 
 
 IntroStage::IntroStage() : Stage("IntroStage") {
@@ -48,7 +49,13 @@ void IntroStage::update(double seconds_elapsed) {
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		if (actualpos == 0) {
 			actualpos = 0;
+			Stage::stages["SelectStage"]->setNext(0);
 			Game::instance->startMenu_theme->StopSound();
+			Game::instance->my_world.loadScene("data/Assets/Tutorial_mission.txt");
+			Stage::stages["SelectStage"]->setActual(5);
+			renderUI(0, Texture::Get("data/Assets/Textures/GUI/tutorial.png"));
+			SDL_GL_SwapWindow(Game::instance->window);
+			Sleep(5000);
 			Stage::current_stage->changeStage("PlayStage");
 		}
 		if (actualpos == 1) {

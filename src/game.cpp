@@ -162,6 +162,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision3.png");
 	t = Texture::Get("data/Assets/Textures/GUI/elegir mision4.png");
 	t = Texture::Get("data/Assets/Textures/GUI/vida.png");
+	Texture::Get("data/Assets/Textures/GUI/interactuar.png");
 
 	MyAudioBass::initbass();
 	startMenu_theme = MyAudioBass::Get("data/Assets/Music/start_menu.mp3", true);
@@ -170,6 +171,13 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav",false);
 	step = MyAudioBass::Get("data/Assets/Music/step.wav",false);
 	final = MyAudioBass::Get("data/Assets/Music/final.mp3", true);
+
+
+	verde = MyAudioBass::Get("data/Assets/Music/verde.mp3", true);
+	naranja = MyAudioBass::Get("data/Assets/Music/naranja.mp3", true);
+	piedra = MyAudioBass::Get("data/Assets/Music/piedra.mp3", true);
+	finalboss = MyAudioBass::Get("data/Assets/Music/finalboss.mp3", true);
+
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
 	my_world.espada = *new Entity("data/Assets/Meshes/basicsword.obj", "data/Assets/Textures/swordtexturelight.png");
@@ -257,7 +265,7 @@ void Game::render(void)
 	m.translateGlobal(my_world.h * 2, 0, -my_world.w * 2);
 	Texture* floor_tex;
 	int mission = Stage::stages["SelectStage"]->returnActualVal();
-	if (mission == 0 || mission == 1) floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
+	if (mission == 0 || mission == 1 || mission == 5) floor_tex = Texture::Get("data/Assets/Textures/ground_plane2.png");
 	else if (mission == 2) floor_tex = Texture::Get("data/Assets/Textures/orange_plane.png");
 	else if (mission == 3 || mission == 4) floor_tex = Texture::Get("data/Assets/Textures/gray_plane.png");
 	renderMesh(m, floor_mesh, floor_tex);

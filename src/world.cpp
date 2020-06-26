@@ -214,7 +214,7 @@ void World::renderMap(std::vector<int> map, int w, int h, Shader* shad) {
 			}
 			else {
 				int val = Stage::stages["SelectStage"]->returnActualVal();
-				if (val == 0 || val == 1)
+				if (val == 0 || val == 1 || val == 5)
 					shad->setUniform("u_texture", Game::instance->textures[i]);
 				else if (val == 2)
 					shad->setUniform("u_texture", Game::instance->textures_seco[i]);

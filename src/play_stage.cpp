@@ -30,6 +30,25 @@ void PlayStage::render() {
 
 	}
 
+	
+	if (player.pos.distance(Game::instance->my_world.tenosuke.pos) < 1.5) {
+
+		renderUI(0, Texture::Get("data/Assets/Textures/GUI/interactuar.png"));
+	}
+	
+
+	//CLOSE TO HEALING POST
+	if (Game::instance->my_world.healing.pos.distance(player.pos) < 2) {
+
+		renderUI(0, Texture::Get("data/Assets/Textures/GUI/interactuar.png"));
+	}
+
+	//CLOSE TO SELECT MISSION
+	if (Game::instance->my_world.mission_point.distance(player.pos) < 2) {
+
+		renderUI(0, Texture::Get("data/Assets/Textures/GUI/interactuar.png"));
+	}
+
 
 };
 
@@ -49,7 +68,7 @@ int checkDif() {
 
 void PlayStage::update(double seconds_elapsed) {
 
-	Game::instance->theme->PlaySoundOnce();
+	//Game::instance->theme->PlaySoundOnce();
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
@@ -68,7 +87,7 @@ void PlayStage::update(double seconds_elapsed) {
 
 	//CLOSE TO STORE
 	if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
-		if (player.pos.distance(my_world.tenosuke.pos)<1) {
+		if (player.pos.distance(my_world.tenosuke.pos)<1.5) {
 			if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 				loadingScreen();
 				Stage::current_stage->changeStage("TiendaStage");
@@ -90,13 +109,32 @@ void PlayStage::update(double seconds_elapsed) {
 			Stage::current_stage->changeStage("SelectStage");
 			return;
 		}
-	} //CLOSE TO THE EXIT
+	} 
+	//CLOSE TO THE EXIT
 	else if (my_world.exit_point.distance(player.pos) < 2) {
 		if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
 			Stage::stages["SelectStage"]->setActual(Stage::stages["SelectStage"]->returnNextVal());
+			BASS_Stop();
+			BASS_Start();
+			if (Stage::stages["SelectStage"]->returnNextVal() == 1) {
+				Game::instance->verde->PlaySoundOnce();
+			}
+			if (Stage::stages["SelectStage"]->returnNextVal() == 2) {
+				Game::instance->naranja->PlaySoundOnce();
+			}
+			if (Stage::stages["SelectStage"]->returnNextVal() == 3) {
+				Game::instance->piedra->PlaySoundOnce();
+			}
+			if (Stage::stages["SelectStage"]->returnNextVal() == 4) {
+				Game::instance->finalboss->PlaySoundOnce();
+			}
 		}
 		else {
 			Stage::stages["SelectStage"]->setActual(0);
+			BASS_Stop();
+			BASS_Start();
+			Game::instance->theme->PlaySoundOnce();
+
 		}
 		Stage::stages["SelectStage"]->setNext(0);
 		char* s = Stage::stages["SelectStage"]->returnMission();
@@ -164,6 +202,17 @@ void PlayStage::update(double seconds_elapsed) {
 			}
 		}
 		if (completed) {
+			if (Stage::stages["SelectStage"]->returnActualVal() == 5) {
+				Stage::stages["SelectStage"]->setActual(0);
+				Stage::stages["SelectStage"]->setNext(1);
+				char* s = Stage::stages["SelectStage"]->returnMission();
+				player.pos = Vector3(-40, 0, 40);
+				Game::instance->my_world.loadScene(s);
+				BASS_Stop();
+				BASS_Start();
+				Stage::current_stage->changeStage("IntroStage");
+			}
+
 			if (Stage::stages["SelectStage"]->returnActualVal() == 4) {
 				//FINAL DEL JUEGO
 				renderUI(0, Texture::Get("data/Assets/Textures/GUI/final.png"));

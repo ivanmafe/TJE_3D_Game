@@ -6,5 +6,5 @@ hero 109 -62 -90
 tenosuke -1 1 0 0
 healing 57.2 -36
 2
-golem 98 -61 -180 0
-golem 100 -61 -180 0
+golem 98 -61 90 0
+golem 100 -61 90 0
