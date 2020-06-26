@@ -169,7 +169,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	theme = MyAudioBass::Get("data/Assets/Music/VillageTheme.mp3",true);
 	hit = MyAudioBass::Get("data/Assets/Music/Hit.wav",false);
 	step = MyAudioBass::Get("data/Assets/Music/step.wav",false);
-	
+	final = MyAudioBass::Get("data/Assets/Music/final.mp3", true);
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
 	my_world.espada = *new Entity("data/Assets/Meshes/basicsword.obj", "data/Assets/Textures/swordtexturelight.png");

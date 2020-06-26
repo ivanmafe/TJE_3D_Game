@@ -168,6 +168,9 @@ void PlayStage::update(double seconds_elapsed) {
 				//FINAL DEL JUEGO
 				renderUI(0, Texture::Get("data/Assets/Textures/GUI/final.png"));
 				SDL_GL_SwapWindow(Game::instance->window);
+				BASS_Stop();
+				BASS_Start();
+				Game::instance->final->PlaySoundOnce();
 				Sleep(15000);
 				Stage::stages["SelectStage"]->setActual(0);
 				Stage::stages["SelectStage"]->setNext(1);
@@ -177,7 +180,6 @@ void PlayStage::update(double seconds_elapsed) {
 				Stage::changeStage("IntroStage");
 				BASS_Stop();
 				BASS_Start();
-				my_world.SaveGame();
 				return;
 			}
 			else {
@@ -255,6 +257,8 @@ void PlayStage::update(double seconds_elapsed) {
 		if (Input::isKeyPressed(SDL_SCANCODE_S)) {
 			player.momentum = -1;
 			if (player.speed < player.max_speed) player.speed += 0.07f;
+			if (player.moveAngle < player.angle * RAD2DEG - 176) player.moveAngle += 270 * seconds_elapsed;
+			else if (player.moveAngle > player.angle * RAD2DEG - 184) player.moveAngle -= 270 * seconds_elapsed;
 			newPos = newPos - (front * player.speed * seconds_elapsed);
 			//targetpos = player.pos - front * player.speed * seconds_elapsed;
 			moves = true;

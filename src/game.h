@@ -37,6 +37,7 @@ public:
 	MyAudioBass* step;
 	MyAudioBass* theme;
 	MyAudioBass* hit;
+	MyAudioBass* final;
 
 	//window
 	SDL_Window* window;
