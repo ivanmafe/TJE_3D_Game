@@ -22,22 +22,22 @@ public:
 	static Game* instance;
 
 	World my_world;
-	std::vector<Entity> tiles;
-	std::vector<Entity> trees;
-	Mesh* meshes[100];
-	Texture* textures[100];
-	Texture* textures_seco[100];
-	Texture* textures_piedra[100];
-	std::vector<Matrix44> models[100];
+	std::vector<Entity> tiles = {};
+	std::vector<Entity> trees = {};
+	Mesh* meshes[100] = {};
+	Texture* textures[100] = {};
+	Texture* textures_seco[100] = {};
+	Texture* textures_piedra[100] = {};
+	std::vector<Matrix44> models[100] = {};
 	
 	//Audio
 
-	MyAudioBass* startMenu_theme;
-	MyAudioBass* intro_theme;	
-	MyAudioBass* step;
-	MyAudioBass* theme;
-	MyAudioBass* hit;
-	MyAudioBass* final;
+	MyAudioBass* startMenu_theme = NULL;
+	MyAudioBass* intro_theme = NULL;
+	MyAudioBass* step = NULL;
+	MyAudioBass* theme = NULL;
+	MyAudioBass* hit = NULL;
+	MyAudioBass* final = NULL;
 
 	//window
 	SDL_Window* window;
