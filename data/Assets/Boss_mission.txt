@@ -2,8 +2,8 @@ data/Assets/final.csv
 data/Assets/Textures/GUI/final_map.png
 10 -10
 0 0
-hero 48 -48 0
+hero 48 -48 180
 tenosuke -1 1 0 0
 healing 8 -42
 1
-boss 20 -26 90 0
+boss 27.5 -30 90 0 51

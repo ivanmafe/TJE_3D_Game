@@ -187,22 +187,23 @@ void PlayStage::update(double seconds_elapsed) {
 	if (my_world.enemies.size() > 0) {
 		bool completed = true;
 		for (int k = 0; k < my_world.enemies.size(); ++k) {
+			
+			//ENEMY BEHAVIOUR
 			if (my_world.enemies[k].life > 0.f) {
 				completed = false;
 				Enemy en = my_world.enemies[k];
 				if (en.pos.distance(player.pos) < en.range && !en.attack) {
-					Vector3 vec = en.pos - player.pos;
-					Vector3 xpos = en.model.getTranslation();
-					en.setModelPos(Vector3());
-					//en.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
-					//en.model.rotateGlobal(90 * DEG2RAD * seconds_elapsed, Vector3(0, 1, 0));
-					en.setModelPos(xpos);
-					en.movePos(vec * en.speed * seconds_elapsed);
 					if (en.speed < en.max_speed) en.speed += 0.07f;
+					Vector3 vec;
+					if (player.pos.z > en.pos.z) vec = en.pos - player.pos;
+					else vec = player.pos - en.pos;
+					en.movePos(vec * en.speed * seconds_elapsed);
+					
 				}
 				else if (en.speed > 0.f) en.speed -= 0.2f;
 				my_world.enemies[k] = en;
 			}
+			///////////////////
 		}
 		if (completed) {
 

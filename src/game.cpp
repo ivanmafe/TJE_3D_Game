@@ -176,7 +176,7 @@ Game::Game(int window_width, int window_height, SDL_Window* window)
 	verde = MyAudioBass::Get("data/Assets/Music/verde.mp3", true);
 	naranja = MyAudioBass::Get("data/Assets/Music/naranja.mp3", true);
 	piedra = MyAudioBass::Get("data/Assets/Music/piedra.mp3", true);
-	finalboss = MyAudioBass::Get("data/Assets/Music/finalboss.mp3", true);
+	finalboss = MyAudioBass::Get("data/Assets/Music/finalbos.mp3", true);
 
 	// Load Map
 	my_world.loadScene("data/Assets/Village.txt");
@@ -301,6 +301,12 @@ void Game::render(void)
 				blendSkeleton(&eaux.idle_anim->skeleton, &eaux.run_anim->skeleton, max(0, frac), eaux.skeleton);
 				renderAnimated(eaux.model, eaux.mesh, eaux.texture, eaux.skeleton);
 			}
+			Vector3 dif = player.pos - eaux.pos;
+			Vector3 old_pos = eaux.pos;
+			eaux.setModelPos(Vector3());
+			if(dif.z > 0) eaux.model.setRotation(180 * DEG2RAD - asin(dif.x / dif.length()),Vector3(0,1,0));
+			else eaux.model.setRotation(asin(dif.x / dif.length()), Vector3(0, 1, 0));
+			eaux.setModelPos(old_pos);
 			eaux.skeleton->updateGlobalMatrices();
 		}
 		else if(eaux.time != -1.f){

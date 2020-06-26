@@ -2,6 +2,7 @@
 #include "input.h"
 #include "game.h"
 #include "utils.h"
+#include "grender.h"
 
 MenuStage::MenuStage() : Stage("MenuStage") {
 	//empty constructor
@@ -83,7 +84,15 @@ void MenuStage::update(double seconds_elapsed) {
 			}
 			if (actualpos == 1) {
 				actualpos = 0;
+				Stage::stages["SelectStage"]->setActual(0);
+				Stage::stages["SelectStage"]->setNext(1);
+				char* s = Stage::stages["SelectStage"]->returnMission();
+				Game::instance->my_world.player.pos = Vector3(-40, 0, 40);
+				Game::instance->my_world.loadScene(s);
+				BASS_Stop();
+				BASS_Start();
 				Stage::current_stage->changeStage("PlayStage");
+				return;
 			}
 			if (actualpos == 2) {
 				actualpos = 0;

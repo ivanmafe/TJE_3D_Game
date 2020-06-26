@@ -335,6 +335,8 @@ void World::loadScene(char* scene_name) {
 		file >> s; 
 		file >> x; file >> z;
 		file >> a; file >> sk;
+		float k = 0;
+		file >> k;
 		std::cout << s + " pos: " << x << ',' << z << '\n';
 		Enemy aux;
 		if (!s.compare("skeleton")) {
@@ -372,6 +374,8 @@ void World::loadScene(char* scene_name) {
 			aux.attack_anim = Animation::Get("data/Assets/animaciones/boss_atack1.skanim");
 			aux.death_anim = Animation::Get("data/Assets/animaciones/boss_dying.skanim");
 		}
+		aux.light_atk = k;
+		std::cout << aux.light_atk;
 		enemies.push_back(aux);
 	}
 }
