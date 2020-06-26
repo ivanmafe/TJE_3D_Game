@@ -5,11 +5,10 @@ data/Assets/Textures/GUI/naranja.png
 hero 109 -62 90
 tenosuke -1 1 0 0
 healing 98 -97
-7
+6
 golem 97 -44 90 0 20
 golem 100 -61 90 0 20
 golem 86 -26 90 0 20
 golem 50 -33.7 90 0 20
 golem 17 -34 90 0 20
-golem 86 -26 90 0 20
 golem 50 -86 90 0 20
