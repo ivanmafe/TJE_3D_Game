@@ -56,3 +56,5 @@ void Entity::setModelPos(Vector3 p) {
 	model.m[14] = p.z;
 	pos = Vector3(p.x, p.y , p.z);
 }
+int Entity::getType() { return type; }
+void Entity::setType(int x) { type = x; }

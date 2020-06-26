@@ -26,6 +26,7 @@ public:
 	float time = 0.f;
 	bool attack = false;
 	float atk_time = 0.f;
+	int type = 0;
 
 	//Animations
 	Skeleton* skeleton;
@@ -48,6 +49,8 @@ public:
 	void movePos(Vector3 p);
 	void changeView(float v);
 	void setModelPos(Vector3 p);
+	void setType(int x);
+	int getType();
 };
 
 

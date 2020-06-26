@@ -7,7 +7,7 @@
 class SelectStage : public Stage
 {
 public:
-	int max_mission = 4;
+	int max_mission = 1;
 	int actual = 0;
 	int next = 1;
 	SelectStage();

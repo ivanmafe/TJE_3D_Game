@@ -71,6 +71,8 @@ void MenuStage::update(double seconds_elapsed) {
 			}
 			if (actualpos == 2) {
 				actualpos = 0;
+				BASS_Stop();
+				BASS_Start();
 				Stage::current_stage->changeStage("IntroStage");
 			}
 		}

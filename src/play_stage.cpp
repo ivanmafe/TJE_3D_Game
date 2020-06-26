@@ -153,6 +153,9 @@ void PlayStage::update(double seconds_elapsed) {
 				player.pos = Vector3(-40, 0, 40);
 				Game::instance->my_world.loadScene(s);
 				Stage::changeStage("IntroStage");
+				BASS_Stop();
+				BASS_Start();
+				my_world.SaveGame();
 				return;
 			}
 			else {

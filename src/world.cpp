@@ -381,13 +381,18 @@ void World::SaveGame() {
 	FILE* f;
 	f = fopen("data/save_log.txt", "wb");
 	if (f) {
-		fwrite(&player, sizeof(Player), 1, f);
-		fwrite(&espada, sizeof(Entity), 1, f);
+		fwrite(&player.pos, sizeof(Vector3), 1, f);
+		fwrite(&player.model, sizeof(Matrix44), 1, f);
+		fwrite(&player.angle, sizeof(float), 1, f);
+		fwrite(&player.moveAngle, sizeof(float), 1, f);
+		fwrite(&player.momentum, sizeof(int), 1, f);
+		fwrite(&player.light_atk, sizeof(float), 1, f);
 		int x = Stage::stages["SelectStage"]->getMaxMission();
 		fwrite(&x, sizeof(int), 1, f);
 		int y = Stage::stages["SelectStage"]->returnNextVal();
 		fwrite(&y, sizeof(int), 1, f);
 	}
+	fclose(f);
 }
 
 bool World::LoadGame() {
@@ -395,16 +400,34 @@ bool World::LoadGame() {
 	FILE* f;
 	f = fopen("data/save_log.txt", "r");
 	if (f) {
-		fread(&player, sizeof(Player), 1, f);
-		fread(&espada, sizeof(int), 1, f);
+		fread(&player.pos, sizeof(Vector3), 1, f);
+		fread(&player.model, sizeof(Matrix44), 1, f);
+		fread(&player.angle, sizeof(float), 1, f);
+		fread(&player.moveAngle, sizeof(float), 1, f);
+		fread(&player.momentum, sizeof(int), 1, f);
+		fread(&player.light_atk, sizeof(float), 1, f);
+		if (player.light_atk == 30) {
+			espada.mesh = Mesh::Get("data/Assets/Meshes/basicsword.obj");
+			espada.texture = Texture::Get("data/Assets/Textures/swordtexturelight.png");
+		}
+		else if (player.light_atk == 45) {
+			espada.mesh = Mesh::Get("data/Assets/Meshes/purplesword.obj");
+			espada.texture = Texture::Get("data/Assets/Textures/PurpleSwords.png");
+		}
+		else if (player.light_atk == 55){
+			espada.mesh = Mesh::Get("data/Assets/Meshes/espada1.obj");
+			espada.texture = Texture::Get("data/Assets/Textures/espada1.png");
+		}
 		int x = 0;
 		fread(&x, sizeof(int), 1, f);
 		Stage::stages["SelectStage"]->setMax(x);
 		fread(&x, sizeof(int), 1, f);
 		Stage::stages["SelectStage"]->setNext(x);
+		fclose(f);
 		return true;
 	}
-	else return false;
-
-
+	else {
+		fclose(f);
+		return false;
+	}
 }

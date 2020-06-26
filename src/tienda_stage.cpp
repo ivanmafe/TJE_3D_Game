@@ -67,6 +67,7 @@ void TiendaStage::update(double seconds_elapsed) {
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		if (actualpos == 0) {
+			Game::instance->my_world.espada.setType(0);
 			Game::instance->my_world.espada.mesh = Mesh::Get("data/Assets/Meshes/basicsword.obj");
 			Game::instance->my_world.espada.texture = Texture::Get("data/Assets/Textures/swordtexturelight.png");
 			Game::instance->my_world.player.light_atk = 30;
@@ -75,24 +76,22 @@ void TiendaStage::update(double seconds_elapsed) {
 		}
 		if (actualpos == 1) {
 			if (Stage::stages["SelectStage"]->getMaxMission() > 1) {
+				Game::instance->my_world.espada.setType(1);
 				Game::instance->my_world.espada.mesh = Mesh::Get("data/Assets/Meshes/purplesword.obj");
 				Game::instance->my_world.espada.texture = Texture::Get("data/Assets/Textures/PurpleSwords.png");
 				Game::instance->my_world.player.light_atk = 45;
 				actualpos = 0;
 				Stage::current_stage->changeStage("PlayStage");
 			}
-			else {
-			}
 		}
 		if (actualpos == 2) {
 			if (Stage::stages["SelectStage"]->getMaxMission() > 3) {
+				Game::instance->my_world.espada.setType(2);
 				Game::instance->my_world.espada.mesh = Mesh::Get("data/Assets/Meshes/espada1.obj");
 				Game::instance->my_world.espada.texture = Texture::Get("data/Assets/Textures/espada1.png");
 				Game::instance->my_world.player.light_atk = 60;
 				actualpos = 0;
 				Stage::current_stage->changeStage("PlayStage");
-			}
-			else {
 			}
 		}
 		if (actualpos == 3) {

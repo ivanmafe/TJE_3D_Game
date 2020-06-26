@@ -63,7 +63,9 @@ void IntroStage::update(double seconds_elapsed) {
 		if (actualpos == 2) {
 			actualpos = 0;
 			Game::instance->startMenu_theme->StopSound();
-			Stage::current_stage->changeStage("IntroStage");
+			if (Game::instance->my_world.LoadGame()) {
+				Stage::current_stage->changeStage("PlayStage");
+			}
 		}
 		if (actualpos == 3) {
 			Game::instance->must_exit=true;
