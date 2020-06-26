@@ -153,6 +153,7 @@ void PlayStage::update(double seconds_elapsed) {
 		player.speed = 0.f;
 	}
 	/// CHEAT MODE ///
+	/*
 	if (Input::wasKeyPressed(SDL_SCANCODE_O)) {
 		player.life -= 10;
 	}
@@ -173,6 +174,7 @@ void PlayStage::update(double seconds_elapsed) {
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_T))
 		Stage::current_stage->changeStage("SelectStage");
+	*/
 	///////////////////
 
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
