@@ -5,8 +5,7 @@ data/Assets/Textures/GUI/roca.png
 hero 105.2 -89.64 90
 tenosuke -1 1 0 0
 healing 57 -35
-5
-ork 95.3 -92.3 90 0 40
+4
 ork 63 -104 90 0 40
 ork 51 -80 90 0 40
 ork 57 -23 90 0 40
