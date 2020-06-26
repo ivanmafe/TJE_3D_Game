@@ -12,8 +12,9 @@ public:
 	Mesh * weapon_mesh = NULL;
 	Texture * weapon_tex = NULL;
 
-	float range = 7.5f;
+	float range = 8.f;
 	bool wasHit = false;
+	
 	Enemy();
 	Enemy(const char* m, const char* t, Vector3 p, int r, float s, int enemy_type);
 };

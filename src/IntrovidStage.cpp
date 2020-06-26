@@ -45,7 +45,7 @@ void IntrovidStage::render() {
 };
 
 void IntrovidStage::update(double seconds_elapsed) {
-    Game::instance->startMenu_theme->PlaySoundOnce();
+    Game::instance->intro_theme->PlaySoundOnce();
     //time += seconds_elapsed;
     //if((((int)time)%4)==0)
         //actualpos++;
@@ -55,6 +55,8 @@ void IntrovidStage::update(double seconds_elapsed) {
 
         if (actualpos == 3) {
             loadingScreen();
+            BASS_Stop();
+            BASS_Start();
             Stage::current_stage->changeStage("IntroStage");
         }
     }

@@ -53,8 +53,9 @@ void PlayStage::update(double seconds_elapsed) {
 	World my_world = Game::instance->my_world;
 	Player player = my_world.player;
 
+	//HAS PLAYER DIED
 	if (player.life <= 0.f) {
-		renderUI(0, Texture::Get("data/Assets/Textures/GUI/vida_baja.png"));
+		renderUI(0, Texture::Get("data/Assets/Textures/GUI/misionfallida.png"));
 		SDL_GL_SwapWindow(Game::instance->window);
 		Sleep(7500);
 		Stage::stages["SelectStage"]->setActual(0);
@@ -65,7 +66,7 @@ void PlayStage::update(double seconds_elapsed) {
 		return;
 	}
 
-
+	//CLOSE TO STORE
 	if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
 		if (player.pos.distance(my_world.tenosuke.pos)<1) {
 			if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
@@ -75,6 +76,7 @@ void PlayStage::update(double seconds_elapsed) {
 		}
 	}
 
+	//CLOSE TO HEALING POST
 	if (my_world.healing.pos.distance(player.pos) < 2) {
 		if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 			Game::instance->my_world.player.life = player.max_life;
@@ -82,13 +84,13 @@ void PlayStage::update(double seconds_elapsed) {
 		}
 	}
 
-
+	//CLOSE TO SELECT MISSION
 	if (my_world.mission_point.distance(player.pos) < 2) {
 		if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 			Stage::current_stage->changeStage("SelectStage");
 			return;
 		}
-	}
+	} //CLOSE TO THE EXIT
 	else if (my_world.exit_point.distance(player.pos) < 2) {
 		if (Stage::stages["SelectStage"]->returnActualVal() == 0) {
 			Stage::stages["SelectStage"]->setActual(Stage::stages["SelectStage"]->returnNextVal());
@@ -104,14 +106,18 @@ void PlayStage::update(double seconds_elapsed) {
 		return;
 	}
 
-
+	//ATTACK
 	if (Input::wasKeyPressed(SDL_SCANCODE_E)) {
 		player.attack = true;
 		player.speed = 0.f;
 	}
+	/// CHEAT MODE ///
 	if (Input::wasKeyPressed(SDL_SCANCODE_O)) {
 		player.life -= 10;
 	}
+	if (Input::wasKeyPressed(SDL_SCANCODE_L))
+		Stage::stages["SelectStage"]->setMax(4);
+
 	if (Input::wasKeyPressed(SDL_SCANCODE_V)) 
 		Stage::current_stage->changeStage("DebugStage"); 
 
@@ -126,7 +132,8 @@ void PlayStage::update(double seconds_elapsed) {
 
 	if (Input::wasKeyPressed(SDL_SCANCODE_T))
 		Stage::current_stage->changeStage("SelectStage");
-		
+	///////////////////
+
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy en = my_world.enemies[k];
 		if (!en.wasHit && player.attack && en.mesh->testSphereCollision(en.model, my_world.espada.model.getTranslation(), 0.5, Vector3(), Vector3())) {
@@ -135,13 +142,28 @@ void PlayStage::update(double seconds_elapsed) {
 			my_world.enemies[k].life -= player.light_atk;
 		}
 	}
+	//NO MORE ENEMIES
 	if (my_world.enemies.size() > 0) {
 		bool completed = true;
-		for (int k = 0; k < my_world.enemies.size(); ++k)
-			if (my_world.enemies[k].life > 0.f) completed = false;
-
+		for (int k = 0; k < my_world.enemies.size(); ++k) {
+			if (my_world.enemies[k].life > 0.f) {
+				completed = false;
+				Enemy en = my_world.enemies[k];
+				if (en.pos.distance(player.pos) < en.range && !en.attack) {
+					Vector3 vec = en.pos - player.pos;
+					Vector3 xpos = en.model.getTranslation();
+					en.setModelPos(Vector3());
+					//en.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
+					//en.model.rotateGlobal(90 * DEG2RAD * seconds_elapsed, Vector3(0, 1, 0));
+					en.setModelPos(xpos);
+					en.movePos(vec * en.speed * seconds_elapsed);
+					if (en.speed < en.max_speed) en.speed += 0.07f;
+				}
+				else if (en.speed > 0.f) en.speed -= 0.2f;
+				my_world.enemies[k] = en;
+			}
+		}
 		if (completed) {
-
 			if (Stage::stages["SelectStage"]->returnActualVal() == 4) {
 				//FINAL DEL JUEGO
 				renderUI(0, Texture::Get("data/Assets/Textures/GUI/final.png"));
@@ -159,6 +181,7 @@ void PlayStage::update(double seconds_elapsed) {
 				return;
 			}
 			else {
+				//FINAL MISION
 				renderUI(0, Texture::Get("data/Assets/Textures/GUI/misioncumplida.png"));
 				SDL_GL_SwapWindow(Game::instance->window);
 				Sleep(5000);
@@ -173,6 +196,7 @@ void PlayStage::update(double seconds_elapsed) {
 			}
 		}
 	}
+	//MOVEMENT
 	if (!player.attack) {
 
 		Vector3 newPos = Vector3();

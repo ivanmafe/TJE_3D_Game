@@ -27,6 +27,8 @@ public:
 	bool attack = false;
 	float atk_time = 0.f;
 	int type = 0;
+	float speed = 0.f;
+	float max_speed = 5;
 
 	//Animations
 	Skeleton* skeleton;

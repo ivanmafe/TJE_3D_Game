@@ -268,11 +268,10 @@ void Game::render(void)
 	for (int k = 0; k < my_world.enemies.size(); ++k) {
 		Enemy eaux = my_world.enemies[k];
 		if (eaux.life > 0.f) {
-			if (!eaux.attack && player.pos.distance(eaux.pos) < 2) {
-				//eaux.model.setRotation(90 * DEG2RAD, Vector3(0, 1, 0));
+			if (!eaux.attack && player.pos.distance(eaux.pos) < 1) {
 				eaux.attack = true;
 			}
-			if (eaux.attack) { /*Attack*/
+			if (eaux.attack) { 
 				if (eaux.atk_time == 0.f) eaux.attack_anim->assignTime(0);
 				eaux.atk_time += Game::instance->elapsed_time;
 				eaux.attack_anim->assignTime(eaux.atk_time);
@@ -286,10 +285,15 @@ void Game::render(void)
 					}
 				}
 			}
-			else { /*Idle*/
+			else{
 				eaux.idle_anim->assignTime(time);
-				renderAnimated(eaux.model, eaux.mesh, eaux.texture, &eaux.idle_anim->skeleton);
+				float run_time = fmod(time, eaux.run_anim->duration);
+				eaux.run_anim->assignTime(run_time);
+				float frac = eaux.speed / eaux.max_speed;
+				blendSkeleton(&eaux.idle_anim->skeleton, &eaux.run_anim->skeleton, max(0, frac), eaux.skeleton);
+				renderAnimated(eaux.model, eaux.mesh, eaux.texture, eaux.skeleton);
 			}
+			eaux.skeleton->updateGlobalMatrices();
 		}
 		else if(eaux.time != -1.f){
 			/*Dying*/
